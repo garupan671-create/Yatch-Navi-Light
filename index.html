@@ -59,29 +59,44 @@
             background-color: var(--card-bg);
             padding: 15px;
             border-radius: 10px;
+            box-sizing: border-box;
         }
         .content-section.active {
             display: block;
         }
-        input, textarea, button.submit-btn {
+        input, textarea, select, button.submit-btn {
             width: 100%;
             padding: 10px;
             margin-top: 10px;
             border-radius: 5px;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-color);
             box-sizing: border-box;
+        }
+        select option {
+            background-color: var(--card-bg);
+            color: var(--text-color);
         }
         button.submit-btn {
             background-color: var(--btn-bg);
             color: var(--bg-color);
             font-weight: bold;
             cursor: pointer;
+            border: none;
         }
         .post {
             background-color: rgba(255, 255, 255, 0.1);
-            padding: 10px;
+            padding: 12px;
             border-radius: 5px;
             margin-top: 10px;
+            border-left: 4px solid var(--accent-color);
+        }
+        .post-title {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: var(--accent-color);
+            margin-bottom: 5px;
         }
         .live-btn {
             display: block;
@@ -132,13 +147,45 @@
 
     <div id="sec-record" class="content-section">
         <h3>📝 練習記録</h3>
-        <input type="text" id="record-title" placeholder="今日の日付やタイトル">
+        
+        <label for="record-date">📅 日付</label>
+        <input type="date" id="record-date">
+
+        <label for="record-class" style="display:block; margin-top:10px;">⛵ クラス</label>
+        <select id="record-class" onchange="updateBoatOptions()">
+            <option value="">-- クラスを選択してください --</option>
+            <option value="470">470</option>
+            <option value="スナイプ">スナイプ</option>
+        </select>
+
+        <label for="record-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
+        <select id="record-boat" disabled>
+            <option value="">-- 先にクラスを選択してください --</option>
+        </select>
+
+        <label for="record-text" style="display:block; margin-top:10px;">📝 練習内容・反省点</label>
         <textarea id="record-text" placeholder="今日の練習内容や反省点..."></textarea>
+        
         <button class="submit-btn" onclick="addRecord()">記録を保存</button>
         <div id="record-list"></div>
     </div>
 
     <script>
+        // 艇番のデータ
+        const boatData = {
+            "470": ["4237", "4146", "4706", "4572", "陸待or整備"],
+            "スナイプ": ["31594", "31287", "31245", "31067", "28675", "30575", "陸待or整備"]
+        };
+
+        // ページ読み込み時に記録を表示
+        window.onload = function() {
+            // 今日の日付を初期値に設定
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('record-date').value = today;
+            
+            loadRecords();
+        };
+
         function switchTab(tabId) {
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
@@ -147,33 +194,32 @@
             document.getElementById('nav-' + tabId).classList.add('active');
         }
 
+        // クラスに応じて艇番の選択肢を切り替える
+        function updateBoatOptions() {
+            const classSelect = document.getElementById('record-class');
+            const boatSelect = document.getElementById('record-boat');
+            const selectedClass = classSelect.value;
+
+            boatSelect.innerHTML = '';
+
+            if (!selectedClass) {
+                boatSelect.innerHTML = '<option value="">-- 先にクラスを選択してください --</option>';
+                boatSelect.disabled = true;
+                return;
+            }
+
+            boatSelect.disabled = false;
+            const boats = boatData[selectedClass];
+            boats.forEach(boat => {
+                const option = document.createElement('option');
+                option.value = boat;
+                option.text = boat;
+                boatSelect.appendChild(option);
+            });
+        }
+
         function addPost() {
             const input = document.getElementById('bbs-input');
-            if (!input.value.trim()) return;
-            
-            const post = document.createElement('div');
-            post.className = 'post';
-            post.innerText = input.value;
-            
-            document.getElementById('bbs-list').prepend(post);
-            input.value = '';
-        }
+            if (!input.value
 
-        function addRecord() {
-            const title = document.getElementById('record-title');
-            const text = document.getElementById('record-text');
-            if (!text.value.trim()) return;
-
-            const record = document.createElement('div');
-            record.className = 'post';
-            record.innerHTML = `<strong>${title.value || '無題'}</strong><br>${text.value}`;
-
-            document.getElementById('record-list').prepend(record);
-            title.value = '';
-            text.value = '';
-        }
-    </script>
-</body>
-</html>
-
-
+  
