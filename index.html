@@ -525,5 +525,24 @@
             displayRecords(records);
             document.getElementById('record-text').value = '';
         }
+function displayRecords(records) {
+            const list = document.getElementById('record-list');
+            list.innerHTML = '';
+            records.forEach(rec => {
+                const item = document.createElement('div');
+                item.className = 'post';
+                item.innerHTML = `
+                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}</div>
+                    <div>${rec.text.replace(/\n/g, '<br>')}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
 
- 
+        function loadRecords() {
+            const records = JSON.parse(localStorage.getItem('yacht_records')) || [];
+            displayRecords(records);
+        }
+    </script>
+</body>
+</html>
