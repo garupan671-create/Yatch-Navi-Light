@@ -12,9 +12,7 @@
             --text-color: #ffffff;
             --accent-color: #4ea8de;
             --btn-bg: #5bc0be;
-            /* 重要度ごとの色 */
             --danger-color: #ff4757;
-            --normal-color: #2ed573;
         }
         body {
             font-family: Arial, sans-serif;
@@ -95,7 +93,6 @@
             margin-top: 10px;
             border-left: 4px solid var(--accent-color);
         }
-        /* 重要度に応じた左線の色変更 */
         .post.priority-high {
             border-left: 5px solid var(--danger-color);
         }
@@ -108,7 +105,6 @@
             color: var(--accent-color);
             margin-bottom: 5px;
         }
-        /* Teams風のバッジ */
         .badge {
             display: inline-block;
             padding: 2px 6px;
@@ -263,7 +259,7 @@
                 <option value="31287">スナイプ - 31287</option>
                 <option value="31245">スナイプ - 31245</option>
                 <option value="31067">スナイプ - 31067</option>
-                <option value="28675">スナイプ - 28675</option>
+                <option value="28675">スナイff - 28675</option>
                 <option value="30575">スナイプ - 30575</option>
                 <option value="陸待or整備">陸待or整備</option>
             </select>
@@ -288,7 +284,7 @@
             <option value="">-- 先にクラスを選択してください --</option>
         </select>
 
-        <label for="record-text" style="display:block; margin-top:10px;">📝 練習内容・反省点</label>
+        <label for="record-text" style="display:block; margin-top:10px;">📝 練習内容・反政点</label>
         <textarea id="record-text" placeholder="今日の練習内容や反省点..."></textarea>
         
         <button class="submit-btn" onclick="addRecord()">記録を保存</button>
@@ -305,23 +301,25 @@
 
         window.onload = function() {
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('record-date').value = today;
-            document.getElementById('maint-date').value = today;
+            
+            // 各日付要素が存在するか確認してから初期化
+            if(document.getElementById('record-date')) document.getElementById('record-date').value = today;
+            if(document.getElementById('maint-date')) document.getElementById('maint-date').value = today;
             
             loadRecords();
             loadMaintRecords();
-            loadBbsPosts(); // 掲示板読み込み
+            loadBbsPosts();
         };
 
         function switchTab(tabId) {
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
             
-            document.getElementById('sec-' + tabId).classList.add('active');
-            document.getElementById('nav-' + tabId).classList.add('active');
+            if(document.getElementById('sec-' + tabId)) document.getElementById('sec-' + tabId).classList.add('active');
+            if(document.getElementById('nav-' + tabId)) document.getElementById('nav-' + tabId).classList.add('active');
         }
 
-        // --- 掲示板機能（追加・保存・表示） ---
+        // --- 掲示板機能 ---
         function addPost() {
             const titleInput = document.getElementById('bbs-title');
             const priorityInput = document.getElementById('bbs-priority');
@@ -344,7 +342,6 @@
             posts.unshift(post);
             localStorage.setItem('yacht_bbs_posts', JSON.stringify(posts));
 
-            // 入力欄クリア
             titleInput.value = '';
             dateInput.value = '';
             textInput.value = '';
@@ -355,6 +352,7 @@
 
         function displayBbsPosts(posts) {
             const list = document.getElementById('bbs-list');
+            if(!list) return;
             list.innerHTML = '';
             
             if(posts.length === 0) {
@@ -364,12 +362,9 @@
 
             posts.forEach(post => {
                 const item = document.createElement('div');
-                // 重要度に応じて枠線のクラスを変える
                 item.className = `post priority-${post.priority}`;
 
-                // 重要度バッジの作成
                 let priorityBadge = post.priority === 'high' ? '<span class="badge badge-high">🚨 重要</span>' : '<span class="badge badge-normal">💬 通常</span>';
-                // 日付バッジ（入力されている場合のみ）
                 let dateBadge = post.date ? `<span class="badge badge-date">📅 予定日: ${post.date}</span>` : '';
 
                 item.innerHTML = `
@@ -389,6 +384,7 @@
         function updateBoatOptions() {
             const classSelect = document.getElementById('record-class');
             const boatSelect = document.getElementById('record-boat');
+            if(!classSelect || !boatSelect) return;
             const selectedClass = classSelect.value;
             boatSelect.innerHTML = '';
             if (!selectedClass) {
@@ -409,6 +405,7 @@
         function updateMaintBoatOptions() {
             const classSelect = document.getElementById('maint-class');
             const boatSelect = document.getElementById('maint-boat');
+            if(!classSelect || !boatSelect) return;
             const selectedClass = classSelect.value;
             boatSelect.innerHTML = '';
             if (!selectedClass) {
@@ -427,6 +424,7 @@
 
         function previewMaintImage(input) {
             const preview = document.getElementById('maint-preview');
+            if(!preview) return;
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -479,6 +477,7 @@
             const filterValue = document.getElementById('filter-boat').value;
             const records = JSON.parse(localStorage.getItem('yacht_maint_records')) || [];
             const list = document.getElementById('maint-list');
+            if(!list) return;
             list.innerHTML = '';
 
             const filtered = records.filter(rec => filterValue === 'all' || rec.boat === filterValue);
@@ -519,30 +518,4 @@
             const record = { date: date, yachClass: yachClass, boat: boat, text: text };
             let records = JSON.parse(localStorage.getItem('yacht_records')) || [];
             records.unshift(record);
-            localStorage.setItem('yacht_records', JSON.stringify(records));
-
-            alert('🎉 練習記録を保存しました！');
-            displayRecords(records);
-            document.getElementById('record-text').value = '';
-        }
-function displayRecords(records) {
-            const list = document.getElementById('record-list');
-            list.innerHTML = '';
-            records.forEach(rec => {
-                const item = document.createElement('div');
-                item.className = 'post';
-                item.innerHTML = `
-                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}</div>
-                    <div>${rec.text.replace(/\n/g, '<br>')}</div>
-                `;
-                list.appendChild(item);
-            });
-        }
-
-        function loadRecords() {
-            const records = JSON.parse(localStorage.getItem('yacht_records')) || [];
-            displayRecords(records);
-        }
-    </script>
-</body>
-</html>
+            localStorage.setItem('yacht_records', JSON.stringify(recor
