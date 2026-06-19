@@ -12,6 +12,9 @@
             --text-color: #ffffff;
             --accent-color: #4ea8de;
             --btn-bg: #5bc0be;
+            /* 重要度ごとの色 */
+            --danger-color: #ff4757;
+            --normal-color: #2ed573;
         }
         body {
             font-family: Arial, sans-serif;
@@ -92,12 +95,33 @@
             margin-top: 10px;
             border-left: 4px solid var(--accent-color);
         }
+        /* 重要度に応じた左線の色変更 */
+        .post.priority-high {
+            border-left: 5px solid var(--danger-color);
+        }
+        .post.priority-normal {
+            border-left: 5px solid var(--accent-color);
+        }
         .post-title {
             font-weight: bold;
             font-size: 1.05rem;
             color: var(--accent-color);
             margin-bottom: 5px;
         }
+        /* Teams風のバッジ */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 5px;
+            color: #fff;
+        }
+        .badge-high { background-color: var(--danger-color); }
+        .badge-normal { background-color: rgba(255,255,255,0.2); }
+        .badge-date { background-color: #ffa502; color: #000; }
+
         .preview-img {
             max-width: 100%;
             max-height: 200px;
@@ -129,7 +153,6 @@
             font-weight: bold;
             margin-top: 15px;
         }
-        /* Windguruウィジェット用のレスポンシブコンテナ */
         .windguru-container {
             width: 100%;
             overflow-x: auto;
@@ -180,14 +203,29 @@
 
     <div id="sec-bbs" class="content-section">
         <h3>📋 部内共有掲示板</h3>
-        <textarea id="bbs-input" placeholder="連絡事項を入力してください..."></textarea>
-        <button class="submit-btn" onclick="addPost()">投稿する</button>
-        <div id="bbs-list"></div>
+        
+        <label for="bbs-title">📝 題名（タイトル）</label>
+        <input type="text" id="bbs-title" placeholder="例：今週末の集合時間について">
+
+        <label for="bbs-priority" style="display:block; margin-top:10px;">⚠️ 重要度</label>
+        <select id="bbs-priority">
+            <option value="normal">💬 通常連絡</option>
+            <option value="high">🚨 緊急・重要</option>
+        </select>
+
+        <label for="bbs-date" style="display:block; margin-top:10px;">📅 予定日・期限（任意）</label>
+        <input type="date" id="bbs-date">
+
+        <label for="bbs-input" style="display:block; margin-top:10px;">💬 本文（連絡内容）</label>
+        <textarea id="bbs-input" placeholder="詳しい連絡内容を入力してください..."></textarea>
+        
+        <button class="submit-btn" style="margin-top:15px;" onclick="addPost()">投稿する</button>
+        
+        <div id="bbs-list" style="margin-top: 20px;"></div>
     </div>
 
     <div id="sec-maintenance" class="content-section">
         <h3>🛠️ ヨット状態・整備管理</h3>
-        
         <h4>🔧 新しい整備・状態を記録</h4>
         <label for="maint-date">📅 日付</label>
         <input type="date" id="maint-date">
@@ -205,7 +243,7 @@
         </select>
 
         <label for="maint-text" style="display:block; margin-top:10px;">📝 整備メモ・セール管理状況</label>
-        <textarea id="maint-text" placeholder="整備箇所やセールの状態（例：メインセール新調など）を入力..."></textarea>
+        <textarea id="maint-text" placeholder="整備箇所やセールの状態を入力..."></textarea>
 
         <label for="maint-file" style="display:block; margin-top:10px;">📸 写真をアップロード</label>
         <input type="file" id="maint-file" accept="image/*" onchange="previewMaintImage(this)">
@@ -230,7 +268,6 @@
                 <option value="陸待or整備">陸待or整備</option>
             </select>
         </div>
-
         <div id="maint-list"></div>
     </div>
 
@@ -273,6 +310,7 @@
             
             loadRecords();
             loadMaintRecords();
+            loadBbsPosts(); // 掲示板読み込み
         };
 
         function switchTab(tabId) {
@@ -281,6 +319,70 @@
             
             document.getElementById('sec-' + tabId).classList.add('active');
             document.getElementById('nav-' + tabId).classList.add('active');
+        }
+
+        // --- 掲示板機能（追加・保存・表示） ---
+        function addPost() {
+            const titleInput = document.getElementById('bbs-title');
+            const priorityInput = document.getElementById('bbs-priority');
+            const dateInput = document.getElementById('bbs-date');
+            const textInput = document.getElementById('bbs-input');
+
+            if (!titleInput.value.trim() || !textInput.value.trim()) {
+                alert('題名と本文は必ず入力してください。');
+                return;
+            }
+
+            const post = {
+                title: titleInput.value,
+                priority: priorityInput.value,
+                date: dateInput.value,
+                text: textInput.value
+            };
+
+            let posts = JSON.parse(localStorage.getItem('yacht_bbs_posts')) || [];
+            posts.unshift(post);
+            localStorage.setItem('yacht_bbs_posts', JSON.stringify(posts));
+
+            // 入力欄クリア
+            titleInput.value = '';
+            dateInput.value = '';
+            textInput.value = '';
+            priorityInput.value = 'normal';
+
+            displayBbsPosts(posts);
+        }
+
+        function displayBbsPosts(posts) {
+            const list = document.getElementById('bbs-list');
+            list.innerHTML = '';
+            
+            if(posts.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.4);">投稿がありません</p>';
+                return;
+            }
+
+            posts.forEach(post => {
+                const item = document.createElement('div');
+                // 重要度に応じて枠線のクラスを変える
+                item.className = `post priority-${post.priority}`;
+
+                // 重要度バッジの作成
+                let priorityBadge = post.priority === 'high' ? '<span class="badge badge-high">🚨 重要</span>' : '<span class="badge badge-normal">💬 通常</span>';
+                // 日付バッジ（入力されている場合のみ）
+                let dateBadge = post.date ? `<span class="badge badge-date">📅 予定日: ${post.date}</span>` : '';
+
+                item.innerHTML = `
+                    <div class="post-title">${priorityBadge}${dateBadge}${post.title}</div>
+                    <div style="margin-top: 5px;">${post.text.replace(/\n/g, '<br>')}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function loadBbsPosts() {
+            const posts = JSON.parse(localStorage.getItem('yacht_bbs_posts')) || [];
+            displayBbsPosts(posts);
         }
 
         // --- 練習記録の連動 ---
@@ -323,7 +425,6 @@
             });
         }
 
-        // 画像のプレビュー処理
         function previewMaintImage(input) {
             const preview = document.getElementById('maint-preview');
             if (input.files && input.files[0]) {
@@ -341,7 +442,6 @@
             }
         }
 
-        // ヨット管理の保存
         function addMaintenanceRecord() {
             const date = document.getElementById('maint-date').value;
             const yachClass = document.getElementById('maint-class').value;
@@ -366,20 +466,15 @@
             records.unshift(record);
             localStorage.setItem('yacht_maint_records', JSON.stringify(records));
 
-            // 入力欄をクリア
             document.getElementById('maint-text').value = '';
             document.getElementById('maint-file').value = '';
             document.getElementById('maint-preview').style.display = 'none';
             currentMaintImageBase64 = "";
 
-            // 保存完了のアラートを表示
             alert('🎉 ヨット管理記録を保存しました！');
-
-            // 保存後に一覧を更新
             filterMaintenanceRecords();
         }
 
-        // 管理記録の表示（フィルター対応）
         function filterMaintenanceRecords() {
             const filterValue = document.getElementById('filter-boat').value;
             const records = JSON.parse(localStorage.getItem('yacht_maint_records')) || [];
@@ -410,7 +505,6 @@
             filterMaintenanceRecords();
         }
 
-        // 練習記録の保存・読み込み
         function addRecord() {
             const date = document.getElementById('record-date').value;
             const yachClass = document.getElementById('record-class').value;
@@ -432,34 +526,4 @@
             document.getElementById('record-text').value = '';
         }
 
-        function displayRecords(records) {
-            const list = document.getElementById('record-list');
-            list.innerHTML = '';
-            records.forEach(rec => {
-                const item = document.createElement('div');
-                item.className = 'post';
-                item.innerHTML = `
-                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}</div>
-                    <div>${rec.text.replace(/\n/g, '<br>')}</div>
-                `;
-                list.appendChild(item);
-            });
-        }
-
-        function loadRecords() {
-            const records = JSON.parse(localStorage.getItem('yacht_records')) || [];
-            displayRecords(records);
-        }
-
-        function addPost() {
-            const input = document.getElementById('bbs-input');
-            if (!input.value.trim()) return;
-            const post = document.createElement('div');
-            post.className = 'post';
-            post.innerText = input.value;
-            document.getElementById('bbs-list').prepend(post);
-            input.value = '';
-        }
-    </script>
-</body>
-</html>
+ 
