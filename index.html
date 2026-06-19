@@ -127,6 +127,7 @@
         .badge-high { background-color: var(--danger-color); }
         .badge-normal { background-color: rgba(255,255,255,0.2); }
         .badge-date { background-color: #ffa502; color: #000; }
+        .badge-user { background-color: #a855f7; color: white; }
 
         .preview-img {
             max-width: 100%;
@@ -171,7 +172,6 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* ログイン画面のスタイル */
         #login-screen {
             display: flex;
             flex-direction: column;
@@ -195,6 +195,18 @@
             display: none;
             width: 100%;
         }
+
+        /* 👤 名前設定用ポップアップ */
+        #name-setup-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(11, 19, 43, 0.95);
+            z-index: 10000;
+        }
     </style>
 </head>
 <body>
@@ -214,8 +226,18 @@
         </div>
     </div>
 
+    <div id="name-setup-screen">
+        <div class="login-box">
+            <h3 style="text-align:center; margin-top:0; color:var(--accent-color);">👤 部員名の登録</h3>
+            <p style="font-size:0.9rem; color:rgba(255,255,255,0.7); text-align:center;">掲示板や記録に表示されるあなたの名前を設定してください。</p>
+            <input type="text" id="user-display-name" placeholder="例：海大 太郎">
+            <button class="submit-btn" id="btn-save-name" style="margin-top:20px;">名前を確定する</button>
+        </div>
+    </div>
+
     <div id="app-container">
         <header>
+            <span id="welcome-msg" style="font-size:0.85rem; position:absolute; left:15px; top:16px; color:rgba(255,255,255,0.6);"></span>
             ⛵ YACHT NAVI Lite
             <button class="logout-btn" id="btn-logout">ログアウト</button>
         </header>
@@ -347,11 +369,11 @@
     </div>
 
     <script type="module">
-        // --- Firebase初期設定 ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
-        // 🔒 Authentication(認証機能)用のモジュールを追加
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+        // 💾 Firestore (データベース) 用のモジュールを追加
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCQ0eCrYy3xYLAis0b3g4FqqOaKeYRYJf8",
@@ -365,31 +387,80 @@
 
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
-        const auth = getAuth(app); // 認証インスタンスの作成
+        const auth = getAuth(app);
+        const db = getFirestore(app); // Firestoreの開始
 
-        // --- 🔐 ログイン・ログアウト制御 ---
-        
+        let currentUserName = "未設定部員";
+        let currentUserUid = "";
+
         // ログイン状態の監視
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             const loginScreen = document.getElementById('login-screen');
             const appContainer = document.getElementById('app-container');
+            const nameSetupScreen = document.getElementById('name-setup-screen');
             
             if (user) {
-                // ログインしている場合：アプリを表示してログイン画面を隠す
+                currentUserUid = user.uid;
                 loginScreen.style.display = 'none';
-                appContainer.style.display = 'block';
-                // データの読み込み
-                loadRecords();
-                filterMaintenanceRecords();
-                loadBbsPosts();
+
+                // Firestoreから名前を検索
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                    // 名前がすでに登録されている場合
+                    currentUserName = userDocSnap.data().name;
+                    document.getElementById('welcome-msg').innerText = `${currentUserName} さん`;
+                    nameSetupScreen.style.display = 'none';
+                    appContainer.style.display = 'block';
+                    
+                    // データの読み込み
+                    loadRecords();
+                    filterMaintenanceRecords();
+                    loadBbsPosts();
+                } else {
+                    // まだ名前が登録されていない場合（初回ログイン）
+                    appContainer.style.display = 'none';
+                    nameSetupScreen.style.display = 'flex';
+                }
             } else {
-                // ログインしていない場合：ログイン画面を表示してアプリを隠す
                 loginScreen.style.display = 'flex';
                 appContainer.style.display = 'none';
+                nameSetupScreen.style.display = 'none';
+                document.getElementById('welcome-msg').innerText = "";
             }
         });
 
-        // ログインボタンを押したときの処理
+        // 名前の確定ボタンを押したとき
+        document.getElementById('btn-save-name').addEventListener('click', async () => {
+            const nameInput = document.getElementById('user-display-name').value.trim();
+            if (!nameInput) {
+                alert('名前を入力してください。');
+                return;
+            }
+
+            try {
+                // Firestoreに名前を保存
+                await setDoc(doc(db, "users", currentUserUid), {
+                    name: nameInput,
+                    email: auth.currentUser.email
+                });
+                currentUserName = nameInput;
+                document.getElementById('welcome-msg').innerText = `${currentUserName} さん`;
+                document.getElementById('name-setup-screen').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                
+                loadRecords();
+                filterMaintenanceRecords();
+                loadBbsPosts();
+                alert('👤 名前の登録が完了しました！');
+            } catch (e) {
+                console.error("Error saving name: ", e);
+                alert('名前の保存に失敗しました。ルールを確認してください。');
+            }
+        });
+
+        // ログインボタン処理
         document.getElementById('btn-login').addEventListener('click', () => {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
@@ -400,23 +471,15 @@
             }
 
             signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // ログイン成功（onAuthStateChangedが検知して画面を切り替えます）
-                    alert('🎉 ログインに成功しました！');
-                })
+                .then(() => { alert('🎉 ログインに成功しました！'); })
                 .catch((error) => {
-                    console.error("Login error:", error);
-                    alert('❌ ログインに失敗しました。IDまたはパスワードが間違っています。');
+                    alert('❌ ログインに失敗しました。');
                 });
         });
 
-        // ログアウトボタンを押したときの処理
+        // ログアウトボタン処理
         document.getElementById('btn-logout').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                alert('🔓 ログアウトしました。');
-            }).catch((error) => {
-                alert('エラーが発生しました。');
-            });
+            signOut(auth).then(() => { alert('🔓 ログアウトしました。'); });
         });
 
 
@@ -428,16 +491,13 @@
 
         let currentMaintImageBase64 = "";
 
-        // タブ切り替えの設定
         function switchTab(tabId) {
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
-            
             if(document.getElementById('sec-' + tabId)) document.getElementById('sec-' + tabId).classList.add('active');
             if(document.getElementById('nav-' + tabId)) document.getElementById('nav-' + tabId).classList.add('active');
         }
 
-        // イベントリスナーの登録
         document.getElementById('nav-weather').addEventListener('click', () => switchTab('weather'));
         document.getElementById('nav-bbs').addEventListener('click', () => switchTab('bbs'));
         document.getElementById('nav-maintenance').addEventListener('click', () => switchTab('maintenance'));
@@ -447,7 +507,7 @@
         function addPost() {
             const titleInput = document.getElementById('bbs-title');
             const priorityInput = document.getElementById('bbs-priority');
-            const dateInput = document.getElementById('bbs-date');
+              const dateInput = document.getElementById('bbs-date');
             const textInput = document.getElementById('bbs-input');
 
             if (!titleInput.value.trim() || !textInput.value.trim()) {
@@ -459,18 +519,15 @@
                 title: titleInput.value,
                 priority: priorityInput.value,
                 date: dateInput.value,
-                text: textInput.value
+                text: textInput.value,
+                author: currentUserName // 👤 投稿者名を記録
             };
 
             let posts = JSON.parse(localStorage.getItem('yacht_bbs_posts')) || [];
             posts.unshift(post);
             localStorage.setItem('yacht_bbs_posts', JSON.stringify(posts));
 
-            titleInput.value = '';
-            dateInput.value = '';
-            textInput.value = '';
-            priorityInput.value = 'normal';
-
+            titleInput.value = ''; dateInput.value = ''; textInput.value = ''; priorityInput.value = 'normal';
             displayBbsPosts(posts);
         }
         document.getElementById('btn-bbs-submit').addEventListener('click', addPost);
@@ -491,9 +548,10 @@
 
                 let priorityBadge = post.priority === 'high' ? '<span class="badge badge-high">🚨 重要</span>' : '<span class="badge badge-normal">💬 通常</span>';
                 let dateBadge = post.date ? `<span class="badge badge-date">📅 予定日: ${post.date}</span>` : '';
+                let authorBadge = `<span class="badge badge-user">👤 投稿者: ${post.author || '不明'}</span>`;
 
                 item.innerHTML = `
-                    <div class="post-title">${priorityBadge}${dateBadge}${post.title}</div>
+                    <div class="post-title">${priorityBadge}${dateBadge}${authorBadge}${post.title}</div>
                     <div style="margin-top: 5px;">${post.text.replace(/\n/g, '<br>')}</div>
                 `;
                 list.appendChild(item);
@@ -518,10 +576,8 @@
                 return;
             }
             boatSelect.disabled = false;
-            boatData[selectedClass].forEac(boat => {
-const option = document.createElement('option');
-                option.value = boat;
-                option.text = boat;
+            boatData[selectedClass].forEach(boat => {
+                const option = document.createElement('option'); option.value = boat; option.text = boat;
                 boatSelect.appendChild(option);
             });
         }
@@ -541,9 +597,7 @@ const option = document.createElement('option');
             }
             boatSelect.disabled = false;
             boatData[selectedClass].forEach(boat => {
-                const option = document.createElement('option');
-                option.value = boat;
-                option.text = boat;
+                const option = document.createElement('option'); option.value = boat; option.text = boat;
                 boatSelect.appendChild(option);
             });
         }
@@ -556,15 +610,12 @@ const option = document.createElement('option');
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
+                    preview.src = e.target.result; preview.style.display = 'block';
                     currentMaintImageBase64 = e.target.result;
                 }
                 reader.readAsDataURL(input.files[0]);
             } else {
-                preview.src = "";
-                preview.style.display = 'none';
-                currentMaintImageBase64 = "";
+                preview.src = ""; preview.style.display = 'none'; currentMaintImageBase64 = "";
             }
         }
         document.getElementById('maint-file').addEventListener('change', previewMaintImage);
@@ -586,7 +637,8 @@ const option = document.createElement('option');
                 yachClass: yachClass,
                 boat: boat,
                 text: text,
-                image: currentMaintImageBase64
+                image: currentMaintImageBase64,
+                author: currentUserName // 👤 整備担当者を記録
             };
 
             let records = JSON.parse(localStorage.getItem('yacht_maint_records')) || [];
@@ -621,8 +673,9 @@ const option = document.createElement('option');
                 const item = document.createElement('div');
                 item.className = 'post';
                 let imgTag = rec.image ? `<img src="${rec.image}" class="uploaded-img">` : '';
+                let authorBadge = `<span class="badge badge-user" style="margin-left:5px;">👤 整備: ${rec.author || '不明'}</span>`;
                 item.innerHTML = `
-                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}</div>
+                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}${authorBadge}</div>
                     <div>${rec.text.replace(/\n/g, '<br>')}</div>
                     ${imgTag}
                 `;
@@ -642,7 +695,7 @@ const option = document.createElement('option');
                 return;
             }
 
-            const record = { date: date, yachClass: yachClass, boat: boat, text: text };
+            const record = { date: date, yachClass: yachClass, boat: boat, text: text, author: currentUserName }; // 👤 練習者を記録
             let records = JSON.parse(localStorage.getItem('yacht_records')) || [];
             records.unshift(record);
             localStorage.setItem('yacht_records', JSON.stringify(records));
@@ -660,15 +713,15 @@ const option = document.createElement('option');
             records.forEach(rec => {
                 const item = document.createElement('div');
                 item.className = 'post';
+                let authorBadge = `<span class="badge badge-user" style="margin-left:5px;">👤 記録者: ${rec.author || '不明'}</span>`;
                 item.innerHTML = `
-                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}</div>
+                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}${authorBadge}</div>
                     <div>${rec.text.replace(/\n/g, '<br>')}</div>
                 `;
                 list.appendChild(item);
             });
         }
 
-        // 初期日付の設定
         const today = new Date().toISOString().split('T')[0];
         if(document.getElementById('record-date')) document.getElementById('record-date').value = today;
         if(document.getElementById('maint-date')) document.getElementById('maint-date').value = today;
@@ -680,3 +733,4 @@ const option = document.createElement('option');
     </script>
 </body>
 </html>
+    
