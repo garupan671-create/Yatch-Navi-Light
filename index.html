@@ -271,6 +271,11 @@
             <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn" style="margin-top: 20px;">
                 🌊 リビエラ公式ライブカメラを開く
             </a>
+
+            <div id="weather-bbs-alerts" style="margin-top: 25px; display: none;">
+                <h4 style="color: var(--accent-color); margin-bottom: 10px;">🚨 間近の予定・連絡</h4>
+                <div id="alert-list"></div>
+            </div>
         </div>
 
         <div id="sec-bbs" class="content-section">
@@ -570,24 +575,61 @@
             const q = query(collection(db, "bbs"), orderBy("createdAt", "desc"));
             onSnapshot(q, (snapshot) => {
                 const list = document.getElementById('bbs-list');
-                if(!list) return;
+                const alertList = document.getElementById('alert-list');
+                const alertArea = document.getElementById('weather-bbs-alerts');
+                
+                if (!list) return;
                 list.innerHTML = '';
+                if (alertList) alertList.innerHTML = '';
+
+                // 📅 日付判定（今日の日付と3日後の日付を計算）
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0]; 
+                
+                const threeDaysLater = new Date();
+                threeDaysLater.setDate(now.getDate() + 3);
+                const threeDaysLaterStr = threeDaysLater.toISOString().split('T')[0];
+
+                let hasAlerts = false;
+
                 snapshot.forEach((doc) => {
                     const data = doc.data();
+                    
+                    // ① 掲示板タブの表示処理
                     const div = document.createElement('div');
                     div.className = `post ${data.priority === 'high' ? 'priority-high' : ''}`;
                     
                     let badges = `<span class="badge ${data.priority === 'high' ? 'badge-high' : 'badge-normal'}">${data.priority === 'high' ? '🚨 重要' : '💬 通常'}</span>`;
-                    if(data.date) badges += `<span class="badge badge-date">📅 ${data.date}</span>`;
+                    if (data.date) badges += `<span class="badge badge-date">📅 ${data.date}</span>`;
                     badges += `<span class="badge badge-user">👤 ${data.userName || '部員'}</span>`;
 
+                    const dateText = data.date ? `<span style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-left: 10px;">(${data.date})</span>` : '';
+                    
                     div.innerHTML = `
-                        <div class="post-title">${data.title}</div>
+                        <div class="post-title">${data.title}${dateText}</div>
                         <div>${badges}</div>
                         <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
                     `;
                     list.appendChild(div);
+
+                    // ② 天気予報アラート連動判定（今日以降、かつ3日後以内）
+                    if (data.date && alertList) {
+                        if (data.date >= todayStr && data.date <= threeDaysLaterStr) {
+                            hasAlerts = true;
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = `post ${data.priority === 'high' ? 'priority-high' : ''}`;
+                            alertDiv.innerHTML = `
+                                <div class="post-title" style="font-size: 0.95rem;">${data.title} <span style="color:#ffa502;">(期日: ${data.date})</span></div>
+                                <p style="white-space:pre-wrap; margin-top:5px; font-size:0.85rem; color:rgba(255,255,255,0.8);">${data.text}</p>
+                            `;
+                            alertList.appendChild(alertDiv);
+                        }
+                    }
                 });
+
+                if (alertArea) {
+                    alertArea.style.display = hasAlerts ? 'block' : 'none';
+                }
             });
         }
 
@@ -610,7 +652,6 @@
                     createdAt: new Date()
                 });
                 
-                // GASへの送信
                 fetch(WEB_APP_URL, {
                     method: 'POST',
                     body: new URLSearchParams({
@@ -729,4 +770,3 @@
     </script>
 </body>
 </html>
- 
