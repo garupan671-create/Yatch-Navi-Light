@@ -245,8 +245,8 @@
         <nav>
             <button id="nav-weather" class="active">☀️ 天気予報</button>
             <button id="nav-bbs">📋 掲示板</button>
-            <button id="nav-maintenance">🛠️ ヨット管理</button>
             <button id="nav-record">📝 練習記録</button>
+            <button id="nav-maintenance">🛠️ ヨット管理</button>
         </nav>
 
         <div id="sec-weather" class="content-section active">
@@ -293,7 +293,36 @@
             
             <button class="submit-btn" style="margin-top:15px;" id="btn-bbs-submit">投稿する</button>
             
+            <div class="search-area" style="margin-top: 20px;">
+                <input type="text" id="bbs-search" placeholder="🔍 過去の連絡をキーワード検索...">
+            </div>
+            
             <div id="bbs-list" style="margin-top: 20px;"></div>
+        </div>
+
+        <div id="sec-record" class="content-section">
+            <h3>📝 練習記録</h3>
+            <label for="record-date">📅 日付</label>
+            <input type="date" id="record-date">
+
+            <label for="record-class" style="display:block; margin-top:10px;">⛵ クラス</label>
+            <select id="record-class">
+                <option value="">-- クラスを選択してください --</option>
+                <option value="470">470</option>
+                <option value="スナイプ">スナイプ</option>
+                <option value="レスキュー艇">レスキュー艇</option>
+            </select>
+
+            <label for="record-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
+            <select id="record-boat" disabled>
+                <option value="">-- 先にクラスを選択してください --</option>
+            </select>
+
+            <label for="record-text" style="display:block; margin-top:10px;">📝 練習内容・反省点</label>
+            <textarea id="record-text" placeholder="今日の練習内容や反省点..."></textarea>
+            
+            <button class="submit-btn" id="btn-record-submit">記録を保存</button>
+            <div id="record-list" style="margin-top: 20px;"></div>
         </div>
 
         <div id="sec-maintenance" class="content-section">
@@ -318,11 +347,8 @@
             <label for="maint-text" style="display:block; margin-top:10px;">📝 整備メモ・セール管理状況</label>
             <textarea id="maint-text" placeholder="整備箇所やセールの状態を入力..."></textarea>
 
-
             <button class="submit-btn" style="margin-top:20px;" id="btn-maint-submit">管理記録を保存</button>
-            <div class="search-area" style="margin-top: 20px;">
-    <input type="text" id="bbs-search" placeholder="🔍 過去の連絡をキーワード検索...">
-            </div>
+            
             <div class="filter-area">
                 <label>🔍 表示する艇を絞り込む</label>
                 <select id="filter-boat">
@@ -331,42 +357,19 @@
                     <option value="4146">470 - 4146</option>
                     <option value="4706">470 - 4706</option>
                     <option value="4572">470 - 4572</option>
+                    <option value="ネプチューン">レスキュー艇 - ネプチューン</option>
+                    <option value="パルパロ5">レスキュー艇 - パルパロ5</option>
+                    <option value="牛若丸">レスキュー艇 - 牛若丸</option>
                     <option value="31594">スナイプ - 31594</option>
                     <option value="31287">スナイプ - 31287</option>
                     <option value="31245">スナイプ - 31245</option>
                     <option value="31067">スナイプ - 31067</option>
                     <option value="28675">スナイプ - 28675</option>
                     <option value="30575">スナイプ - 30575</option>
-                    <option value="パルパロ5">レスキュー艇 - パルパロ5</option>
-                    <option value="牛若丸">レスキュー艇 - 牛若丸</option>
                     <option value="陸待or整備">陸待or整備</option>
                 </select>
             </div>
-            <div id="maint-list"></div>
-        </div>
-
-        <div id="sec-record" class="content-section">
-            <h3>📝 練習記録</h3>
-            <label for="record-date">📅 日付</label>
-            <input type="date" id="record-date">
-
-            <label for="record-class" style="display:block; margin-top:10px;">⛵ クラス</label>
-            <select id="record-class">
-                <option value="">-- クラスを選択してください --</option>
-                <option value="470">470</option>
-                <option value="スナイプ">スナイプ</option>
-            </select>
-
-            <label for="record-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
-            <select id="record-boat" disabled>
-                <option value="">-- 先にクラスを選択してください --</option>
-            </select>
-
-            <label for="record-text" style="display:block; margin-top:10px;">📝 練習内容・反省点</label>
-            <textarea id="record-text" placeholder="今日の練習内容や反省点..."></textarea>
-            
-            <button class="submit-btn" id="btn-record-submit">記録を保存</button>
-            <div id="record-list"></div>
+            <div id="maint-list" style="margin-top: 20px;"></div>
         </div>
     </div>
 
@@ -374,7 +377,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCQ0eCrYy3xYLAis0b3g4FqqOaKeYRYJf8",
@@ -394,10 +397,7 @@
         let currentUserName = "未設定部員";
         let currentUserUid = "";
 
-        // 🔗 GASのウェブアプリのURL
-
-         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxgJpapiejENTUKZoltEP55BUf7SRGLnIQLHzrgNaq5_rnukIPq3KycUaHgSSa3NXJ6/exec";
-
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyP8-MWJyATLOuhDT79pJZftV0agLCw6cgOaRLzmzK35Aogcti5uI4X2KEx84tMKuBG/exec";
 
         onAuthStateChanged(auth, async (user) => {
             const loginScreen = document.getElementById('login-screen');
@@ -418,7 +418,7 @@
                     appContainer.style.display = 'block';
                     
                     loadRecords();
-                    filterMaintenanceRecords();
+                    loadMaintenanceRecords();
                     loadBbsPosts();
                 } else {
                     appContainer.style.display = 'none';
@@ -450,12 +450,12 @@
                 document.getElementById('app-container').style.display = 'block';
                 
                 loadRecords();
-                filterMaintenanceRecords();
+                loadMaintenanceRecords();
                 loadBbsPosts();
                 alert('👤 名前の登録が完了しました！');
             } catch (e) {
                 console.error("Error saving name: ", e);
-                alert('名前の保存に失敗しました。ルールを確認してください。');
+                alert('名前の保存に失敗しました。');
             }
         });
 
@@ -481,10 +481,9 @@
 
         const boatData = {
             "470": ["4237", "4146", "4706", "4572", "陸待or整備"],
-            "スナイプ": ["31594", "31287", "31245", "31067", "28675", "30575", "陸待or整備"]
+            "スナイプ": ["31594", "31287", "31245", "31067", "28675", "30575", "陸待or整備"],
+            "レスキュー艇": ["ネプチューン", "パルパロ5", "牛若丸"]
         };
-
-        let currentMaintImageBase64 = "";
 
         function switchTab(tabId) {
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
@@ -498,281 +497,236 @@
         document.getElementById('nav-maintenance').addEventListener('click', () => switchTab('maintenance'));
         document.getElementById('nav-record').addEventListener('click', () => switchTab('record'));
 
-        function addPost() {
-            const titleInput = document.getElementById('bbs-title');
-            const priorityInput = document.getElementById('bbs-priority');
-            const dateInput = document.getElementById('bbs-date');
-            const textInput = document.getElementById('bbs-input');
+        function updateBoatOptions(classSelectId, boatSelectId) {
+            const classSelect = document.getElementById(classSelectId);
+            const boatSelect = document.getElementById(boatSelectId);
+            const selectedClass = classSelect.value;
 
-            if (!titleInput.value.trim() || !textInput.value.trim()) {
+            boatSelect.innerHTML = '';
 
-                alert('題名と本文は必ず入力してください。');
-                return;
+            if (selectedClass && boatData[selectedClass]) {
+                boatSelect.disabled = false;
+                boatData[selectedClass].forEach(boat => {
+                    const opt = document.createElement('option');
+                    opt.value = boat;
+                    opt.textContent = boat;
+                    boatSelect.appendChild(opt);
+                });
+            } else {
+                boatSelect.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "-- 先にクラスを選択してください --";
+                boatSelect.appendChild(opt);
             }
-
-            const post = {
-                title: titleInput.value,
-                priority: priorityInput.value,
-                date: dateInput.value,
-                text: textInput.value,
-                author: currentUserName
-            };
-
-            let posts = JSON.parse(localStorage.getItem('yacht_bbs_posts')) || [];
-            posts.unshift(post);
-            localStorage.setItem('yacht_bbs_posts', JSON.stringify(posts));
-
-            titleInput.value = ''; dateInput.value = ''; textInput.value = ''; priorityInput.value = 'normal';
-            displayBbsPosts(posts);
         }
-        document.getElementById('btn-bbs-submit').addEventListener('click', addPost);
 
-        function displayBbsPosts(posts) {
-            const list = document.getElementById('bbs-list');
-            if(!list) return;
-            list.innerHTML = '';
-            
-            if(posts.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.4);">投稿がありません</p>';
-                return;
-            }
+        document.getElementById('maint-class').addEventListener('change', () => updateBoatOptions('maint-class', 'maint-boat'));
+        document.getElementById('record-class').addEventListener('change', () => updateBoatOptions('record-class', 'record-boat'));
 
+        // 🔍 掲示板キーワード検索
+        document.getElementById('bbs-search').addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase().trim();
+            const posts = document.querySelectorAll('#bbs-list .post');
             posts.forEach(post => {
-                const item = document.createElement('div');
-                item.className = `post priority-${post.priority}`;
-
-                let priorityBadge = post.priority === 'high' ? '<span class="badge badge-high">🚨 重要</span>' : '<span class="badge badge-normal">💬 通常</span>';
-                let dateBadge = post.date ? `<span class="badge badge-date">📅 予定日: ${post.date}</span>` : '';
-                let authorBadge = `<span class="badge badge-user">👤 投稿者: ${post.author || '不明'}</span>`;
-
-                item.innerHTML = `
-                    <div class="post-title">${priorityBadge}${dateBadge}${authorBadge}${post.title}</div>
-                    <div style="margin-top: 5px;">${post.text.replace(/\n/g, '<br>')}</div>
-                `;
-                list.appendChild(item);
+                const title = post.querySelector('.post-title')?.innerText.toLowerCase() || "";
+                const content = post.innerText.toLowerCase();
+                if (title.includes(keyword) || content.includes(keyword)) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
             });
-        }
+        });
+
+        // 📋 掲示板の投稿・読み込み
+        document.getElementById('btn-bbs-submit').addEventListener('click', async () => {
+            const title = document.getElementById('bbs-title').value.trim();
+            const priority = document.getElementById('bbs-priority').value;
+            const date = document.getElementById('bbs-date').value;
+            const text = document.getElementById('bbs-input').value.trim();
+
+            if (!title || !text) {
+                alert('題名と本文を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "bbs"), {
+                    title, priority, date, text,
+                    userName: currentUserName,
+                    createdAt: new Date()
+                });
+                document.getElementById('bbs-title').value = '';
+                document.getElementById('bbs-date').value = '';
+                document.getElementById('bbs-input').value = '';
+                alert('📋 掲示板に投稿しました！');
+            } catch (e) {
+                alert('投稿に失敗しました。');
+            }
+        });
 
         function loadBbsPosts() {
-            const posts = JSON.parse(localStorage.getItem('yacht_bbs_posts')) || [];
-            displayBbsPosts(posts);
-        }
-// 🔍 掲示板のキーワード検索機能
-document.getElementById('bbs-search').addEventListener('input', (e) => {
-    const keyword = e.target.value.toLowerCase().trim();
-    const posts = document.querySelectorAll('#bbs-list .post');
+            const q = query(collection(db, "bbs"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('bbs-list');
+                if(!list) return;
+                list.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const div = document.createElement('div');
+                    div.className = `post ${data.priority === 'high' ? 'priority-high' : ''}`;
+                    
+                    let badges = `<span class="badge ${data.priority === 'high' ? 'badge-high' : 'badge-normal'}">${data.priority === 'high' ? '🚨 重要' : '💬 通常'}</span>`;
+                    if(data.date) badges += `<span class="badge badge-date">📅 ${data.date}</span>`;
+                    badges += `<span class="badge badge-user">👤 ${data.userName || '部員'}</span>`;
 
-    posts.forEach(post => {
-        const title = post.querySelector('.post-title')?.innerText.toLowerCase() || "";
-        const content = post.innerText.toLowerCase();
-
-        if (title.includes(keyword) || content.includes(keyword)) {
-            post.style.display = 'block';
-        } else {
-            post.style.display = 'none';
-        }
-    });
-});
-
-        function updateBoatOptions() {
-            const classSelect = document.getElementById('record-class');
-            const boatSelect = document.getElementById('record-boat');
-            if(!classSelect || !boatSelect) return;
-            const selectedClass = classSelect.value;
-            boatSelect.innerHTML = '';
-            if (!selectedClass) {
-                boatSelect.innerHTML = '<option value="">-- 先にクラスを選択してください --</option>';
-                boatSelect.disabled = true;
-                return;
-            }
-            boatSelect.disabled = false;
-            boatData[selectedClass].forEach(boat => {
-                const option = document.createElement('option'); option.value = boat; option.text = boat;
-                boatSelect.appendChild(option);
+                    div.innerHTML = `
+                        <div class="post-title">${data.title}</div>
+                        <div>${badges}</div>
+                        <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
+                    `;
+                    list.appendChild(div);
+                });
             });
         }
-        document.getElementById('record-class').addEventListener('change', updateBoatOptions);
 
-        function updateMaintBoatOptions() {
-            const classSelect = document.getElementById('maint-class');
-            const boatSelect = document.getElementById('maint-boat');
-            if(!classSelect || !boatSelect) return;
-            const selectedClass = classSelect.value;
-            boatSelect.innerHTML = '';
-            if (!selectedClass) {
-                boatSelect.innerHTML = '<option value="">-- 先にクラスを選択してください --</option>';
-                boatSelect.disabled = true;
-                return;
-            }
-            boatSelect.disabled = false;
-            boatData[selectedClass].forEach(boat => {
-                const option = document.createElement('option'); option.value = boat; option.text = boat;
-                boatSelect.appendChild(option);
-            });
-        }
-        document.getElementById('maint-class').addEventListener('change', updateMaintBoatOptions);
-
-        function previewMaintImage(e) {
-            const input = e.target;
-            const preview = document.getElementById('maint-preview');
-            if(!preview) return;
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result; preview.style.display = 'block';
-                    currentMaintImageBase64 = e.target.result;
-                }
-                reader.readAsDataURL(input.files[0]);
-            } else {
-                preview.src = ""; preview.style.display = 'none'; currentMaintImageBase64 = "";
-            }
-        }
-        document.getElementById('maint-file').addEventListener('change', previewMaintImage);
-
-        async function addMaintenanceRecord() {
+        // 🛠️ ヨット管理の保存・読み込み・絞り込み
+        document.getElementById('btn-maint-submit').addEventListener('click', async () => {
             const date = document.getElementById('maint-date').value;
-            const yachClass = document.getElementById('maint-class').value;
+            const className = document.getElementById('maint-class').value;
             const boat = document.getElementById('maint-boat').value;
-            const text = document.getElementById('maint-text').value;
-            const submitBtn = document.getElementById('btn-maint-submit');
+            const text = document.getElementById('maint-text').value.trim();
 
-            if (!date || !yachClass || !boat || !text.trim()) {
-                alert('文字項目はすべて入力してください。');
-                return;
-            }
-
-            let finalImageUrl = "";
-
-            if (currentMaintImageBase64) {
-                submitBtn.disabled = true;
-                submitBtn.innerText = "📸 写真をGoogleドライブに保存中...";
-
-                try {
-                    const response = await fetch(WEB_APP_URL, {
-                        method: "POST",
-                        body: JSON.stringify({
-                            image: currentMaintImageBase64,
-                            className: yachClass,
-                            boatNumber: boat
-                        })
-                    });
-                    const result = await response.json();
-
-                    if (result.status === "success") {
-                        finalImageUrl = result.url;
-                    } else {
-                        console.error("GAS Error:", result.message);
-                        alert("⚠️ Googleドライブへの写真保存に失敗しました。記録のみ保存します。");
-                    }
-                } catch (error) {
-                    console.error("Fetch Error:", error);
-                    alert("⚠️ ネットワークエラーにより写真の同期に失敗しました。");
-                }
-            }
-
-            const record = {
-                id: Date.now(),
-                date: date,
-                yachClass: yachClass,
-                boat: boat,
-                text: text,
-                image: finalImageUrl,
-                author: currentUserName
-            };
-
-            let records = JSON.parse(localStorage.getItem('yacht_maint_records')) || [];
-            records.unshift(record);
-            localStorage.setItem('yacht_maint_records', JSON.stringify(records));
-
-            document.getElementById('maint-text').value = '';
-            document.getElementById('maint-file').value = '';
-            document.getElementById('maint-preview').style.display = 'none';
-            currentMaintImageBase64 = "";
-
-            submitBtn.disabled = false;
-            submitBtn.innerText = "管理記録を保存";
-
-            alert('🎉 ヨット管理記録を保存しました！');
-            filterMaintenanceRecords();
-        }
-        document.getElementById('btn-maint-submit').addEventListener('click', addMaintenanceRecord);
-
-        function filterMaintenanceRecords() {
-            const filterValue = document.getElementById('filter-boat').value;
-            const records = JSON.parse(localStorage.getItem('yacht_maint_records')) || [];
-            const list = document.getElementById('maint-list');
-            if(!list) return;
-            list.innerHTML = '';
-
-            const filtered = records.filter(rec => filterValue === 'all' || rec.boat === filterValue);
-
-            if(filtered.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.4);">記録がありません</p>';
-                return;
-            }
-
-            filtered.forEach(rec => {
-                const item = document.createElement('div');
-                item.className = 'post';
-                let imgTag = rec.image ? `<img src="${rec.image}" class="uploaded-img">` : '';
-                let authorBadge = `<span class="badge badge-user" style="margin-left:5px;">👤 整備: ${rec.author || '不明'}</span>`;
-                item.innerHTML = `
-                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}${authorBadge}</div>
-                    <div>${rec.text.replace(/\n/g, '<br>')}</div>
-                    ${imgTag}
-                `;
-                list.appendChild(item);
-            });
-        }
-        document.getElementById('filter-boat').addEventListener('change', filterMaintenanceRecords);
-
-        function addRecord() {
-            const date = document.getElementById('record-date').value;
-            const yachClass = document.getElementById('record-class').value;
-            const boat = document.getElementById('record-boat').value;
-            const text = document.getElementById('record-text').value;
-
-            if (!date || !yachClass || !boat || !text.trim()) {
+            if (!date || !className || !boat || !text) {
                 alert('すべての項目を入力してください。');
                 return;
             }
 
-            const record = { date: date, yachClass: yachClass, boat: boat, text: text, author: currentUserName };
-            let records = JSON.parse(localStorage.getItem('yacht_records')) || [];
-            records.unshift(record);
-            localStorage.setItem('yacht_records', JSON.stringify(records));
+            try {
+                await addDoc(collection(db, "maintenance"), {
+                    date, className, boat, text,
+                    userName: currentUserName,
+                    createdAt: new Date()
+                });
+                
+                // GASへの送信
+                fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        'type': 'maintenance',
+                        'date': date,
+                        'class': className,
+                        'boat': boat,
+                        'text': text,
+                        'user': currentUserName
+                    })
+                }).catch(e => console.error("GAS送信エラー:", e));
 
-            alert('🎉 練習記録を保存しました！');
-            displayRecords(records);
-            document.getElementById('record-text').value = '';
-        }
-        document.getElementById('btn-record-submit').addEventListener('click', addRecord);
+                document.getElementById('maint-text').value = '';
+                alert('🛠️ 管理記録を保存しました！');
+            } catch (e) {
+                alert('保存に失敗しました。');
+            }
+        });
 
-        function displayRecords(records) {
-            const list = document.getElementById('record-list');
-            if(!list) return;
-            list.innerHTML = '';
-            records.forEach(rec => {
-                const item = document.createElement('div');
-                item.className = 'post';
-                let authorBadge = `<span class="badge badge-user" style="margin-left:5px;">👤 記録者: ${rec.author || '不明'}</span>`;
-                item.innerHTML = `
-                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}${authorBadge}</div>
-                    <div>${rec.text.replace(/\n/g, '<br>')}</div>
-                `;
-                list.appendChild(item);
+        let allMaintRecords = [];
+        function loadMaintenanceRecords() {
+            const q = query(collection(db, "maintenance"), orderBy("date", "desc"));
+            onSnapshot(q, (snapshot) => {
+                allMaintRecords = [];
+                snapshot.forEach(doc => {
+                    allMaintRecords.push(doc.data());
+                });
+                applyMaintenanceFilter();
             });
         }
 
-        const today = new Date().toISOString().split('T')[0];
-        if(document.getElementById('record-date')) document.getElementById('record-date').value = today;
-        if(document.getElementById('maint-date')) document.getElementById('maint-date').value = today;
+        function applyMaintenanceFilter() {
+            const filterValue = document.getElementById('filter-boat').value;
+            const list = document.getElementById('maint-list');
+            if(!list) return;
+            list.innerHTML = '';
+
+            const filtered = allMaintRecords.filter(rec => filterValue === 'all' || rec.boat === filterValue);
+
+            if(filtered.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.5); text-align:center;">記録がありません。</p>';
+                return;
+            }
+
+            filtered.forEach(data => {
+                const div = document.createElement('div');
+                div.className = 'post';
+                div.innerHTML = `
+                    <div class="post-title">［${data.date}］${data.className} - ${data.boat}</div>
+                    <div><span class="badge badge-user">👤 記録者: ${data.userName || '不明'}</span></div>
+                    <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('filter-boat').addEventListener('change', applyMaintenanceFilter);
+
+        // 📝 練習記録の保存・読み込み
+        document.getElementById('btn-record-submit').addEventListener('click', async () => {
+            const date = document.getElementById('record-date').value;
+            const className = document.getElementById('record-class').value;
+            const boat = document.getElementById('record-boat').value;
+            const text = document.getElementById('record-text').value.trim();
+
+            if (!date || !className || !boat || !text) {
+                alert('すべての項目を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "records"), {
+                    date, className, boat, text,
+                    userName: currentUserName,
+                    createdAt: new Date()
+                });
+
+                fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        'type': 'record',
+                        'date': date,
+                        'class': className,
+                        'boat': boat,
+                        'text': text,
+                        'user': currentUserName
+                    })
+                }).catch(e => console.error("GAS送信エラー:", e));
+
+                document.getElementById('record-text').value = '';
+                alert('📝 練習記録を保存しました！');
+            } catch (e) {
+                alert('保存に失敗しました。');
+            }
+        });
 
         function loadRecords() {
-            const records = JSON.parse(localStorage.getItem('yacht_records')) || [];
-            displayRecords(records);
+            const q = query(collection(db, "records"), orderBy("date", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('record-list');
+                if(!list) return;
+                list.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'post';
+                    div.innerHTML = `
+                        <div class="post-title">［${data.date}］${data.className} - ${data.boat}</div>
+                        <div><span class="badge badge-user">👤 記録者: ${data.userName || '不明'}</span></div>
+                        <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
+                    `;
+                    list.appendChild(div);
+                });
+            });
         }
     </script>
 </body>
 </html>
-                
+ 
