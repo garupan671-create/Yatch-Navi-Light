@@ -2,341 +2,163 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ヨット部スマート管理</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YACHT NAVI Lite</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Yacht Navi Light">
-    <link rel="apple-touch-icon" href="logo.png">
-
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* HTMLビュアー内や各種ブラウザでの予期せぬ表示崩れ防止 */
-        html, body {
-            height: 100%;
+        :root {
+            --bg-color: #0b132b;
+            --card-bg: #1c2541;
+            --text-color: #ffffff;
+            --accent-color: #4ea8de;
+            --btn-bg: #5bc0be;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
             padding: 0;
-            background-color: #020617; /* bg-slate-950 */
-            color: #f8fafc; /* text-slate-100 */
-            font-family: sans-serif;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        /* スムーズスクロールとスクロールバー非表示設定 */
-        .no-scrollbar::-webkit-scrollbar {
+        header {
+            background-color: var(--card-bg);
+            width: 100%;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 2px solid var(--accent-color);
+        }
+        nav {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 10px 0;
+        }
+        nav button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        nav button.active {
+            background-color: var(--accent-color);
+        }
+        .content-section {
             display: none;
+            width: 90%;
+            max-width: 500px;
+            margin-top: 20px;
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
         }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        .content-section.active {
+            display: block;
         }
-        /* 入力欄ズーム防止と共通スタイルフォールバック */
-        input, select, textarea {
-            font-size: 16px !important;
-            background-color: #090d16;
-            border-color: #1e293b;
-            color: #f8fafc;
+        input, textarea, button.submit-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: none;
+            box-sizing: border-box;
         }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #06b6d4;
+        button.submit-btn {
+            background-color: var(--btn-bg);
+            color: var(--bg-color);
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .post {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
         }
     </style>
 </head>
-<body class="flex flex-col min-h-screen relative pb-20">
+<body>
 
-    <div id="account-gate" class="fixed inset-0 bg-slate-950/95 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
-            <div class="text-center space-y-1">
-                <span class="text-4xl">⛵</span>
-                <h2 class="text-lg font-black tracking-wider text-white">ヨット部アカウント作成</h2>
-                <p class="text-xs text-slate-400">活動反省や整備ログを記録するために、まず名前を登録してください。</p>
-            </div>
+    <header>⛵ YACHT NAVI Lite</header>
 
-            <form id="gate-form" onsubmit="createAccountSubmit(event)" class="space-y-4 text-xs">
-                <div>
-                    <label class="text-slate-400 block mb-1 font-bold">あなたのなまえ *</label>
-                    <input type="text" id="gate-user-name" required placeholder="例: 江の島 太郎" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-slate-100 font-bold focus:border-cyan-500">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-slate-400 block mb-1 font-bold">担当クラス</label>
-                        <select id="gate-user-class" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 focus:border-cyan-500">
-                            <option value="470級">470級</option>
-                            <option value="スナイプ級">スナイプ級</option>
-                            <option value="マネージャー・サポート">マネージャー・サポート</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1 font-bold">マイ艇番 (任意)</label>
-                        <input type="text" id="gate-user-boat" placeholder="例: 4680" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-100 font-mono">
-                    </div>
-                </div>
+    <nav>
+        <button id="nav-weather" class="active" onclick="switchTab('weather')">☀️ 天気予報</button>
+        <button id="nav-bbs" onclick="switchTab('bbs')">📋 掲示板</button>
+        <button id="nav-camera" onclick="switchTab('camera')">📹 ライブカメラ</button>
+        <button id="nav-record" onclick="switchTab('record')">📝 練習記録</button>
+    </nav>
 
-                <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-xl transition text-xs shadow-lg shadow-cyan-950">
-                    アカウントを作成してログイン
-                </button>
-            </form>
-        </div>
+    <div id="sec-weather" class="content-section active">
+        <h3>☀️ 江の島 天気・風速</h3>
+        <p>予報データがここに表示されます（調整中）</p>
     </div>
 
-    <header class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 sticky top-0 z-45 shadow-md">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-1.5">
-                <span class="text-lg">⛵</span>
-                <h1 class="text-sm font-black tracking-wider text-white">YACHT NAVI <span class="text-cyan-400">Lite</span></h1>
-            </div>
-            <div onclick="switchTab('settings')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-cyan-300 px-2.5 py-1 rounded-full font-bold flex items-center gap-1 cursor-pointer transition">
-                <span>👤</span>
-                <span id="header-user-display">ゲスト</span>
-            </div>
-        </div>
-    </header>
-
-    <div id="filter-bar-container" class="bg-slate-900/95 border-b border-slate-800 sticky top-[45px] z-30 backdrop-blur hidden">
-        <div class="max-w-md mx-auto px-4 py-2 flex items-center justify-between gap-2">
-            <span class="text-[10px] text-slate-400 font-bold shrink-0">表示する選手:</span>
-            <div class="flex gap-1 overflow-x-auto pb-1 w-full text-[11px] no-scrollbar" id="global-member-filter">
-                </div>
-        </div>
+    <div id="sec-bbs" class="content-section">
+        <h3>📋 部内共有掲示板</h3>
+        <textarea id="bbs-input" placeholder="連絡事項を入力してください..."></textarea>
+        <button class="submit-btn" onclick="addPost()">投稿する</button>
+        <div id="bbs-list"></div>
     </div>
 
-    <main class="flex-grow max-w-md w-full mx-auto px-3 py-3 space-y-4">
+    <div id="sec-camera" class="content-section">
+        <h3>📹 ライブカメラ</h3>
+        <p>海の状況を確認しましょう。</p>
+    </div>
 
-        <section id="tab-home" class="tab-content block space-y-3">
+    <div id="sec-record" class="content-section">
+        <h3>📝 練習記録</h3>
+        <input type="text" id="record-title" placeholder="今日の日付やタイトル">
+        <textarea id="record-text" placeholder="今日の練習内容や反省点..."></textarea>
+        <button class="submit-btn" onclick="addRecord()">記録を保存</button>
+        <div id="record-list"></div>
+    </div>
+
+    <script>
+        // タブ切り替えのプログラム
+        function switchTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
             
-            <div class="bg-gradient-to-br from-blue-950/40 via-slate-900 to-slate-900 p-3 rounded-xl border border-blue-900/40 space-y-2 text-xs">
-                <div class="flex justify-between items-center">
-                    <span class="font-bold text-blue-300 flex items-center gap-1">📊 江の島 3時間天気・風速予報</span>
-                    <button onclick="fetchEnoshimaForecast()" class="text-[9px] bg-blue-900/60 hover:bg-blue-800 text-blue-300 px-2 py-0.5 rounded border border-blue-800">
-                        更新
-                    </button>
-                </div>
-                
-                <div class="grid grid-cols-4 gap-1 text-center py-1" id="weather-forecast-container">
-                    <div class="text-slate-500 col-span-4 py-2">予報ロード中...</div>
-                </div>
+            document.getElementById('sec-' + tabId).classList.add('active');
+            document.getElementById('nav-' + tabId).classList.add('active');
+        }
 
-                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-850 flex items-center justify-between gap-2">
-                    <div class="space-y-0.5">
-                        <span class="text-[10px] text-slate-400 block">リビエラ公式 ライブカメラ ＆ 周辺風速</span>
-                        <span class="text-[9px] text-slate-500 block">Riviera Live Wind Data</span>
-                    </div>
-                    <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-bold px-3 py-2 rounded-lg transition-all flex items-center gap-1 text-center">
-                        風予報を開く ↗
-                    </a>
-                </div>
-            </div>
+        // 掲示板の投稿プログラム
+        function addPost() {
+            const input = document.getElementById('bbs-input');
+            if (!input.value.trim()) return;
+            
+            const post = document.createElement('div');
+            post.className = 'post';
+            post.innerText = input.value;
+            
+            document.getElementById('bbs-list').prepend(post);
+            input.value = '';
+        }
 
-            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
-                <h2 class="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
-                    📢 部内共有掲示板
-                </h2>
+        // 練習記録の保存プログラム
+        function addRecord() {
+            const title = document.getElementById('record-title');
+            const text = document.getElementById('record-text');
+            if (!text.value.trim()) return;
 
-                <form id="board-form" onsubmit="postToBoard(event)" class="space-y-2 text-xs">
-                    <div class="flex gap-2">
-                        <input type="text" id="b-post-text" required placeholder="全体連絡や、海上の状況などを共有しよう..." class="flex-grow bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100 focus:border-emerald-500">
-                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg transition-colors shrink-0">
-                            投稿
-                        </button>
-                    </div>
-                </form>
+            const record = document.createElement('div');
+            record.className = 'post';
+            record.innerHTML = `<strong>${title.value || '無題'}</strong><br>${text.value}`;
 
-                <div class="space-y-2 max-h-72 overflow-y-auto pr-1 no-scrollbar" id="board-posts-container">
-                    </div>
-            </div>
-        </section>
-
-        <section id="tab-weather" class="tab-content hidden space-y-3">
-            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
-                <h2 class="text-sm font-bold text-cyan-400 flex items-center gap-1.5">
-                    📝 活動反省メモの登録
-                </h2>
-
-                <form id="weather-form" onsubmit="saveWeatherLog(event)" class="space-y-3 text-xs">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">記録者</label>
-                            <input type="text" id="w-name" readonly class="w-full bg-slate-950 border border-slate-850 rounded-lg p-2 text-slate-400 font-bold focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">活動日時・日数カウント</label>
-                            <select id="w-days-count" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100">
-                                <option value="練習1日目">練習1日目</option>
-                                <option value="練習2日目">練習2日目</option>
-                                <option value="合宿1日目">合宿1日目</option>
-                                <option value="合宿2日目">合宿2日目</option>
-                                <option value="合宿3日目">合宿3日目</option>
-                                <option value="合宿4日目">合宿4日目</option>
-                                <option value="大会1日目">大会1日目</option>
-                                <option value="大会2日目">大会2日目</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">日付</label>
-                            <input type="date" id="w-date" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100">
-                        </div>
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">乗船した艇番</label>
-                            <select id="w-boat-no" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100">
-                                </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="text-slate-400 block mb-0.5">本日の活動反省・気づきメモ</label>
-                        <textarea id="w-notes" required rows="3" placeholder="（例）今日のスタート練習では、他艇との間隔が狭い中、スピードを維持したまま並ぶことができた。風下のつぶし合いに注意する。" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100"></textarea>
-                    </div>
-
-                    <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2.5 rounded-lg font-bold text-white transition text-xs shadow-md">
-                        活動反省を保存する
-                    </button>
-                </form>
-            </div>
-
-            <div class="space-y-4" id="weather-list">
-                </div>
-        </section>
-
-        <section id="tab-boats" class="tab-content hidden space-y-3">
-            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
-                <h2 class="text-sm font-bold text-yellow-500 flex items-center gap-1.5">
-                    🔧 艇体整備＆セール記録
-                </h2>
-
-                <form id="boat-form" onsubmit="saveBoatLog(event)" class="space-y-3 text-xs">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">対象の艇番</label>
-                            <select id="b-no" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100">
-                                </select>
-                        </div>
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">担当・作業者</label>
-                            <input type="text" id="b-worker" readonly class="w-full bg-slate-950 border border-slate-850 rounded-lg p-2 text-slate-400 font-bold focus:outline-none">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">整備・記録カテゴリ</label>
-                            <select id="b-category" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100" onchange="toggleSailFields(this.value)">
-                                <option value="ハル補修">ハル補修・FRP</option>
-                                <option value="マスト・艤装">マスト・ワイヤー艤装</option>
-                                <option value="セール管理">セール新調・枚数管理</option>
-                                <option value="その他">その他消耗品</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">状態ステータス</label>
-                            <select id="b-status" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100">
-                                <option value="整備完了">🟢 整備完了・出艇可能</option>
-                                <option value="監視中">🟡 要注意・様子見</option>
-                                <option value="要修理">🔴 破損・出艇不可</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="sail-fields" class="hidden grid grid-cols-2 gap-2 bg-slate-950 p-2 rounded-lg border border-slate-800">
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">セールの種類</label>
-                            <select id="b-sail-type" class="w-full bg-slate-900 border border-slate-850 rounded p-1.5 text-slate-100">
-                                <option value="メインセール">メインセール</option>
-                                <option value="ジブセール">ジブセール</option>
-                                <option value="スピンネーカー">スピンネーカー</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">現在の合計所持枚数</label>
-                            <input type="number" id="b-sail-count" placeholder="1" class="w-full bg-slate-900 border border-slate-850 rounded p-1.5 text-slate-100">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">整備写真添付</label>
-                            <input type="file" id="b-img" accept="image/*" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-1.5 text-slate-400 text-[10px]">
-                        </div>
-                        <div>
-                            <label class="text-slate-400 block mb-0.5">整備箇所 / 部品</label>
-                            <input type="text" id="b-part" placeholder="バウ、フォアステイ等" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="text-slate-400 block mb-0.5">作業内容・消耗状況メモ</label>
-                        <textarea id="b-desc" rows="2" placeholder="バウのFRP樹脂積層、サンディング仕上げ完了。" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-100"></textarea>
-                    </div>
-
-                    <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-500 py-2.5 rounded-lg font-bold text-slate-950 transition text-xs shadow-md">
-                        整備ログを保存
-                    </button>
-                </form>
-            </div>
-
-            <div class="space-y-2" id="boat-list">
-                </div>
-        </section>
-
-        <section id="tab-finance" class="tab-content hidden space-y-3">
-            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
-                <h2 class="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
-                    🪙 レシート・経費精算 (AI/手動)
-                </h2>
-
-                <div class="space-y-3">
-                    <div class="bg-slate-950 p-4 rounded-xl border-2 border-dashed border-slate-800 text-center relative hover:border-slate-700 transition">
-                        <input type="file" id="receipt-file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="processReceipt(this)">
-                        <div class="space-y-1">
-                            <span class="text-2xl block">📸</span>
-                            <span class="text-xs text-slate-300 font-bold block">レシートを撮影 または アップロード</span>
-                            <span class="text-[10px] text-slate-500 block">タップしてファイルを選択</span>
-                        </div>
-                    </div>
-
-                    <div id="receipt-preview" class="hidden bg-slate-950 p-2 rounded border border-slate-800 space-y-2 text-xs">
-                        <img id="receipt-preview-img" src="" class="max-h-40 mx-auto object-contain rounded">
-                        <button onclick="analyzeReceiptWithAI()" id="btn-ai-analyze" class="w-full bg-emerald-600 py-2 rounded font-bold text-white text-xs">
-                            ⚡ AIでレシート情報を高速自動抽出
-                        </button>
-                    </div>
-
-                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2 text-xs">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="text-slate-400 block">購入者</label>
-                                <input type="text" id="f-buyer" readonly class="w-full bg-slate-900 border border-slate-800 p-2 rounded text-slate-400 font-bold focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="text-slate-400 block">金額(¥)</label>
-                                <input type="number" id="f-amount" placeholder="0" class="w-full bg-slate-900 border border-slate-800 p-1.5 rounded text-slate-100 font-bold">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="text-slate-400 block">日付</label>
-                                <input type="date" id="f-date" class="w-full bg-slate-900 border border-slate-800 p-1.5 rounded text-slate-100">
-                            </div>
-                            <div>
-                                <label class="text-slate-400 block">費目</label>
-                                <select id="f-category" class="w-full bg-slate-900 border border-slate-800 p-1.5 rounded text-slate-100">
-                                    <option value="艤装・部品">艤装・部品費</option>
-                                    <option value="消耗品">消耗品(ロープ等)</option>
-                                    <option value="大会・遠征">大会・遠征費</option>
-                                    <option value="その他">その他</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+            document.getElementById('record-list').prepend(record);
+            title.value = '';
+            text.value = '';
+        }
+    </script>
 </body>
 </html>
 
