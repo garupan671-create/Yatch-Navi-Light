@@ -220,6 +220,70 @@
 
         function addPost() {
             const input = document.getElementById('bbs-input');
-            if (!input.value
+            if (!input.value()) return;
+            
+            const post = document.createElement('div');
+            post.className = 'post';
+            post.innerText = input.value;
+            
+            document.getElementById('bbs-list').prepend(post);
+            input.value = '';
+        }
+
+        // 練習記録を保存する
+        function addRecord() {
+            const date = document.getElementById('record-date').value;
+            const yachClass = document.getElementById('record-class').value;
+            const boat = document.getElementById('record-boat').value;
+            const text = document.getElementById('record-text').value;
+
+            if (!date || !yachClass || !boat || !text.trim()) {
+                alert('すべての項目を入力してください。');
+                return;
+            }
+
+            const record = {
+                date: date,
+                yachClass: yachClass,
+                boat: boat,
+                text: text
+            };
+
+            // ローカルストレージから既存のデータを取得して追加
+            let records = JSON.parse(localStorage.getItem('yacht_records')) || [];
+            records.unshift(record); // 文頭に追加
+            localStorage.setItem('yacht_records', JSON.stringify(records));
+
+            // 画面を更新
+            displayRecords(records);
+
+            // テキストエリアだけクリア
+            document.getElementById('record-text').value = '';
+        }
+
+        // 記録を画面に表示する
+        function displayRecords(records) {
+            const list = document.getElementById('record-list');
+            list.innerHTML = '';
+
+            records.forEach(rec => {
+                const item = document.createElement('div');
+                item.className = 'post';
+                item.innerHTML = `
+                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}</div>
+                    <div>${rec.text.replace(/\n/g, '<br>')}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // 記録をローカルストレージから読み込む
+        function loadRecords() {
+            const records = JSON.parse(localStorage.getItem('yacht_records')) || [];
+            displayRecords(records);
+        }
+    </script>
+</body>
+</html>
 
   
