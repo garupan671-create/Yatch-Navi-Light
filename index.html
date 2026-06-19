@@ -372,7 +372,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-        // 💾 Firestore (データベース) 用のモジュールを追加
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -388,12 +387,14 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const auth = getAuth(app);
-        const db = getFirestore(app); // Firestoreの開始
+        const db = getFirestore(app);
 
         let currentUserName = "未設定部員";
         let currentUserUid = "";
 
-        // ログイン状態の監視
+        // 🔗 GASのウェブアプリのURL
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyP8-MWJyATLOuhDT79pJZftV0agLCw6cgOaRLzmzK35Aogcti5uI4X2KEx84tMKuBG/exec";
+
         onAuthStateChanged(auth, async (user) => {
             const loginScreen = document.getElementById('login-screen');
             const appContainer = document.getElementById('app-container');
@@ -403,23 +404,19 @@
                 currentUserUid = user.uid;
                 loginScreen.style.display = 'none';
 
-                // Firestoreから名前を検索
                 const userDocRef = doc(db, "users", user.uid);
                 const userDocSnap = await getDoc(userDocRef);
 
                 if (userDocSnap.exists()) {
-                    // 名前がすでに登録されている場合
                     currentUserName = userDocSnap.data().name;
                     document.getElementById('welcome-msg').innerText = `${currentUserName} さん`;
                     nameSetupScreen.style.display = 'none';
                     appContainer.style.display = 'block';
                     
-                    // データの読み込み
                     loadRecords();
                     filterMaintenanceRecords();
                     loadBbsPosts();
                 } else {
-                    // まだ名前が登録されていない場合（初回ログイン）
                     appContainer.style.display = 'none';
                     nameSetupScreen.style.display = 'flex';
                 }
@@ -431,7 +428,6 @@
             }
         });
 
-        // 名前の確定ボタンを押したとき
         document.getElementById('btn-save-name').addEventListener('click', async () => {
             const nameInput = document.getElementById('user-display-name').value.trim();
             if (!nameInput) {
@@ -440,7 +436,6 @@
             }
 
             try {
-                // Firestoreに名前を保存
                 await setDoc(doc(db, "users", currentUserUid), {
                     name: nameInput,
                     email: auth.currentUser.email
@@ -460,7 +455,6 @@
             }
         });
 
-        // ログインボタン処理
         document.getElementById('btn-login').addEventListener('click', () => {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
@@ -477,13 +471,10 @@
                 });
         });
 
-        // ログアウトボタン処理
         document.getElementById('btn-logout').addEventListener('click', () => {
             signOut(auth).then(() => { alert('🔓 ログアウトしました。'); });
         });
 
-
-        // --- アプリのロジック ---
         const boatData = {
             "470": ["4237", "4146", "4706", "4572", "陸待or整備"],
             "スナイプ": ["31594", "31287", "31245", "31067", "28675", "30575", "陸待or整備"]
@@ -503,14 +494,14 @@
         document.getElementById('nav-maintenance').addEventListener('click', () => switchTab('maintenance'));
         document.getElementById('nav-record').addEventListener('click', () => switchTab('record'));
 
-        // --- 掲示板機能 ---
         function addPost() {
             const titleInput = document.getElementById('bbs-title');
             const priorityInput = document.getElementById('bbs-priority');
-              const dateInput = document.getElementById('bbs-date');
+            const dateInput = document.getElementById('bbs-date');
             const textInput = document.getElementById('bbs-input');
 
             if (!titleInput.value.trim() || !textInput.value.trim()) {
+
                 alert('題名と本文は必ず入力してください。');
                 return;
             }
@@ -520,7 +511,7 @@
                 priority: priorityInput.value,
                 date: dateInput.value,
                 text: textInput.value,
-                author: currentUserName // 👤 投稿者名を記録
+                author: currentUserName
             };
 
             let posts = JSON.parse(localStorage.getItem('yacht_bbs_posts')) || [];
@@ -563,7 +554,6 @@
             displayBbsPosts(posts);
         }
 
-        // --- 練習記録の連動 ---
         function updateBoatOptions() {
             const classSelect = document.getElementById('record-class');
             const boatSelect = document.getElementById('record-boat');
@@ -583,7 +573,6 @@
         }
         document.getElementById('record-class').addEventListener('change', updateBoatOptions);
 
-        // --- ヨット管理の連動 ---
         function updateMaintBoatOptions() {
             const classSelect = document.getElementById('maint-class');
             const boatSelect = document.getElementById('maint-boat');
@@ -620,15 +609,45 @@
         }
         document.getElementById('maint-file').addEventListener('change', previewMaintImage);
 
-        function addMaintenanceRecord() {
+        async function addMaintenanceRecord() {
             const date = document.getElementById('maint-date').value;
             const yachClass = document.getElementById('maint-class').value;
             const boat = document.getElementById('maint-boat').value;
             const text = document.getElementById('maint-text').value;
+            const submitBtn = document.getElementById('btn-maint-submit');
 
             if (!date || !yachClass || !boat || !text.trim()) {
                 alert('文字項目はすべて入力してください。');
                 return;
+            }
+
+            let finalImageUrl = "";
+
+            if (currentMaintImageBase64) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "📸 写真をGoogleドライブに保存中...";
+
+                try {
+                    const response = await fetch(WEB_APP_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            image: currentMaintImageBase64,
+                            className: yachClass,
+                            boatNumber: boat
+                        })
+                    });
+                    const result = await response.json();
+
+                    if (result.status === "success") {
+                        finalImageUrl = result.url;
+                    } else {
+                        console.error("GAS Error:", result.message);
+                        alert("⚠️ Googleドライブへの写真保存に失敗しました。記録のみ保存します。");
+                    }
+                } catch (error) {
+                    console.error("Fetch Error:", error);
+                    alert("⚠️ ネットワークエラーにより写真の同期に失敗しました。");
+                }
             }
 
             const record = {
@@ -637,8 +656,8 @@
                 yachClass: yachClass,
                 boat: boat,
                 text: text,
-                image: currentMaintImageBase64,
-                author: currentUserName // 👤 整備担当者を記録
+                image: finalImageUrl,
+                author: currentUserName
             };
 
             let records = JSON.parse(localStorage.getItem('yacht_maint_records')) || [];
@@ -649,6 +668,9 @@
             document.getElementById('maint-file').value = '';
             document.getElementById('maint-preview').style.display = 'none';
             currentMaintImageBase64 = "";
+
+            submitBtn.disabled = false;
+            submitBtn.innerText = "管理記録を保存";
 
             alert('🎉 ヨット管理記録を保存しました！');
             filterMaintenanceRecords();
@@ -695,7 +717,7 @@
                 return;
             }
 
-            const record = { date: date, yachClass: yachClass, boat: boat, text: text, author: currentUserName }; // 👤 練習者を記録
+            const record = { date: date, yachClass: yachClass, boat: boat, text: text, author: currentUserName };
             let records = JSON.parse(localStorage.getItem('yacht_records')) || [];
             records.unshift(record);
             localStorage.setItem('yacht_records', JSON.stringify(records));
@@ -733,4 +755,4 @@
     </script>
 </body>
 </html>
-    
+                
