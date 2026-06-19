@@ -98,6 +98,25 @@
             color: var(--accent-color);
             margin-bottom: 5px;
         }
+        .preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .uploaded-img {
+            max-width: 100%;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .filter-area {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px dashed var(--accent-color);
+        }
         .live-btn {
             display: block;
             text-align: center;
@@ -118,7 +137,7 @@
     <nav>
         <button id="nav-weather" class="active" onclick="switchTab('weather')">☀️ 天気予報</button>
         <button id="nav-bbs" onclick="switchTab('bbs')">📋 掲示板</button>
-        <button id="nav-camera" onclick="switchTab('camera')">📹 ライブカメラ</button>
+        <button id="nav-maintenance" onclick="switchTab('maintenance')">🛠️ ヨット管理</button>
         <button id="nav-record" onclick="switchTab('record')">📝 練習記録</button>
     </nav>
 
@@ -137,17 +156,59 @@
         <div id="bbs-list"></div>
     </div>
 
-    <div id="sec-camera" class="content-section">
-        <h3>📹 ライブカメラ</h3>
-        <p>海の状況を確認しましょう。</p>
-        <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn">
-            🌊 リビエラ公式ライブカメラを開く
-        </a>
+    <div id="sec-maintenance" class="content-section">
+        <h3>🛠️ ヨット状態・整備管理</h3>
+        
+        <div class="filter-area">
+            <label>🔍 表示する艇を絞り込む</label>
+            <select id="filter-boat" onchange="filterMaintenanceRecords()">
+                <option value="all">🔄 すべての艇番を表示</option>
+                <option value="4237">470 - 4237</option>
+                <option value="4146">470 - 4146</option>
+                <option value="4706">470 - 4706</option>
+                <option value="4572">470 - 4572</option>
+                <option value="31594">スナイプ - 31594</option>
+                <option value="31287">スナイプ - 31287</option>
+                <option value="31245">スナイプ - 31245</option>
+                <option value="31067">スナイプ - 31067</option>
+                <option value="28675">スナイプ - 28675</option>
+                <option value="30575">スナイプ - 30575</option>
+                <option value="陸待or整備">陸待or整備</option>
+            </select>
+        </div>
+
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+
+        <h4>🔧 新しい整備・状態を記録</h4>
+        <label for="maint-date">📅 日付</label>
+        <input type="date" id="maint-date">
+
+        <label for="maint-class" style="display:block; margin-top:10px;">⛵ クラス</label>
+        <select id="maint-class" onchange="updateMaintBoatOptions()">
+            <option value="">-- クラスを選択してください --</option>
+            <option value="470">470</option>
+            <option value="スナイプ">スナイプ</option>
+        </select>
+
+        <label for="maint-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
+        <select id="maint-boat" disabled>
+            <option value="">-- 先にクラスを選択してください --</option>
+        </select>
+
+        <label for="maint-text" style="display:block; margin-top:10px;">📝 整備メモ・セール管理状況</label>
+        <textarea id="maint-text" placeholder="整備箇所やセールの状態（例：メインセール新調など）を入力..."></textarea>
+
+        <label for="maint-file" style="display:block; margin-top:10px;">📸 写真をアップロード</label>
+        <input type="file" id="maint-file" accept="image/*" onchange="previewMaintImage(this)">
+        <img id="maint-preview" class="preview-img">
+
+        <button class="submit-btn" style="margin-top:20px;" onclick="addMaintenanceRecord()">管理記録を保存</button>
+        
+        <div id="maint-list" style="margin-top:20px;"></div>
     </div>
 
     <div id="sec-record" class="content-section">
         <h3>📝 練習記録</h3>
-        
         <label for="record-date">📅 日付</label>
         <input type="date" id="record-date">
 
@@ -171,19 +232,20 @@
     </div>
 
     <script>
-        // 艇番のデータ
         const boatData = {
             "470": ["4237", "4146", "4706", "4572", "陸待or整備"],
             "スナイプ": ["31594", "31287", "31245", "31067", "28675", "30575", "陸待or整備"]
         };
 
-        // ページ読み込み時に記録を表示
+        let currentMaintImageBase64 = "";
+
         window.onload = function() {
-            // 今日の日付を初期値に設定
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('record-date').value = today;
+            document.getElementById('maint-date').value = today;
             
             loadRecords();
+            loadMaintRecords();
         };
 
         function switchTab(tabId) {
@@ -194,23 +256,19 @@
             document.getElementById('nav-' + tabId).classList.add('active');
         }
 
-        // クラスに応じて艇番の選択肢を切り替える
+        // --- 練習記録の連動 ---
         function updateBoatOptions() {
             const classSelect = document.getElementById('record-class');
             const boatSelect = document.getElementById('record-boat');
             const selectedClass = classSelect.value;
-
             boatSelect.innerHTML = '';
-
             if (!selectedClass) {
                 boatSelect.innerHTML = '<option value="">-- 先にクラスを選択してください --</option>';
                 boatSelect.disabled = true;
                 return;
             }
-
             boatSelect.disabled = false;
-            const boats = boatData[selectedClass];
-            boats.forEach(boat => {
+            boatData[selectedClass].forEach(boat => {
                 const option = document.createElement('option');
                 option.value = boat;
                 option.text = boat;
@@ -218,19 +276,109 @@
             });
         }
 
-        function addPost() {
-            const input = document.getElementById('bbs-input');
-            if (!input.value()) return;
-            
-            const post = document.createElement('div');
-            post.className = 'post';
-            post.innerText = input.value;
-            
-            document.getElementById('bbs-list').prepend(post);
-            input.value = '';
+        // --- ヨット管理の連動 ---
+        function updateMaintBoatOptions() {
+            const classSelect = document.getElementById('maint-class');
+            const boatSelect = document.getElementById('maint-boat');
+            const selectedClass = classSelect.value;
+            boatSelect.innerHTML = '';
+            if (!selectedClass) {
+                boatSelect.innerHTML = '<option value="">-- 先にクラスを選択してください --</option>';
+                boatSelect.disabled = true;
+                return;
+            }
+            boatSelect.disabled = false;
+            boatData[selectedClass].forEach(boat => {
+                const option = document.createElement('option');
+                option.value = boat;
+                option.text = boat;
+                boatSelect.appendChild(option);
+            });
         }
 
-        // 練習記録を保存する
+        // 画像のプレビュー処理
+        function previewMaintImage(input) {
+            const preview = document.getElementById('maint-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    currentMaintImageBase64 = e.target.result; // 一時保存用
+                }
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.src = "";
+                preview.style.display = 'none';
+                currentMaintImageBase64 = "";
+            }
+        }
+
+        // ヨット管理の保存
+        function addMaintenanceRecord() {
+            const date = document.getElementById('maint-date').value;
+            const yachClass = document.getElementById('maint-class').value;
+            const boat = document.getElementById('maint-boat').value;
+            const text = document.getElementById('maint-text').value;
+
+            if (!date || !yachClass || !boat || !text.trim()) {
+                alert('文字項目はすべて入力してください。');
+                return;
+            }
+
+            const record = {
+                id: Date.now(),
+                date: date,
+                yachClass: yachClass,
+                boat: boat,
+                text: text,
+                image: currentMaintImageBase64
+            };
+
+            let records = JSON.parse(localStorage.getItem('yacht_maint_records')) || [];
+            records.unshift(record);
+            localStorage.setItem('yacht_maint_records', JSON.stringify(records));
+
+            document.getElementById('maint-text').value = '';
+            document.getElementById('maint-file').value = '';
+            document.getElementById('maint-preview').style.display = 'none';
+            currentMaintImageBase64 = "";
+
+            filterMaintenanceRecords(); // フィルター状態を維持して再表示
+        }
+
+        // 管理記録の表示（フィルター対応）
+        function filterMaintenanceRecords() {
+            const filterValue = document.getElementById('filter-boat').value;
+            const records = JSON.parse(localStorage.getItem('yacht_maint_records')) || [];
+            const list = document.getElementById('maint-list');
+            list.innerHTML = '';
+
+            const filtered = records.filter(rec => filterValue === 'all' || rec.boat === filterValue);
+
+            if(filtered.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.4);">記録がありません</p>';
+                return;
+            }
+
+            filtered.forEach(rec => {
+                const item = document.createElement('div');
+                item.className = 'post';
+                let imgTag = rec.image ? `<img src="${rec.image}" class="uploaded-img">` : '';
+                item.innerHTML = `
+                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}</div>
+                    <div>${rec.text.replace(/\n/g, '<br>')}</div>
+                    ${imgTag}
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function loadMaintRecords() {
+            filterMaintenanceRecords();
+        }
+
+        // 練習記録の保存・読み込み
         function addRecord() {
             const date = document.getElementById('record-date').value;
             const yachClass = document.getElementById('record-class').value;
@@ -242,30 +390,18 @@
                 return;
             }
 
-            const record = {
-                date: date,
-                yachClass: yachClass,
-                boat: boat,
-                text: text
-            };
-
-            // ローカルストレージから既存のデータを取得して追加
+            const record = { date: date, yachClass: yachClass, boat: boat, text: text };
             let records = JSON.parse(localStorage.getItem('yacht_records')) || [];
-            records.unshift(record); // 文頭に追加
+            records.unshift(record);
             localStorage.setItem('yacht_records', JSON.stringify(records));
 
-            // 画面を更新
             displayRecords(records);
-
-            // テキストエリアだけクリア
             document.getElementById('record-text').value = '';
         }
 
-        // 記録を画面に表示する
         function displayRecords(records) {
             const list = document.getElementById('record-list');
             list.innerHTML = '';
-
             records.forEach(rec => {
                 const item = document.createElement('div');
                 item.className = 'post';
@@ -277,13 +413,20 @@
             });
         }
 
-        // 記録をローカルストレージから読み込む
         function loadRecords() {
             const records = JSON.parse(localStorage.getItem('yacht_records')) || [];
             displayRecords(records);
         }
+
+        function addPost() {
+            const input = document.getElementById('bbs-input');
+            if (!input.value.trim()) return;
+            const post = document.createElement('div');
+            post.className = 'post';
+            post.innerText = input.value;
+            document.getElementById('bbs-list').prepend(post);
+            input.value = '';
+        }
     </script>
 </body>
 </html>
-
-  
