@@ -514,8 +514,36 @@
                 alert('すべての項目を入力してください。');
                 return;
             }
-
-            const record = { date: date, yachClass: yachClass, boat: boat, text: text };
+const record = { date: date, yachClass: yachClass, boat: boat, text: text };
             let records = JSON.parse(localStorage.getItem('yacht_records')) || [];
             records.unshift(record);
-            localStorage.setItem('yacht_records', JSON.stringify(recor
+            localStorage.setItem('yacht_records', JSON.stringify(records));
+
+            alert('🎉 練習記録を保存しました！');
+            displayRecords(records);
+            document.getElementById('record-text').value = '';
+        }
+
+        function displayRecords(records) {
+            const list = document.getElementById('record-list');
+            if(!list) return;
+            list.innerHTML = '';
+            records.forEach(rec => {
+                const item = document.createElement('div');
+                item.className = 'post';
+                item.innerHTML = `
+                    <div class="post-title">［${rec.date}］${rec.yachClass} - ${rec.boat}</div>
+                    <div>${rec.text.replace(/\n/g, '<br>')}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function loadRecords() {
+            const records = JSON.parse(localStorage.getItem('yacht_records')) || [];
+            displayRecords(records);
+        }
+    </script>
+</body>
+</html>
+            
