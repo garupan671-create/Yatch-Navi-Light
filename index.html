@@ -32,6 +32,19 @@
             font-size: 1.2rem;
             font-weight: bold;
             border-bottom: 2px solid var(--accent-color);
+            position: relative;
+        }
+        .logout-btn {
+            position: absolute;
+            right: 15px;
+            top: 12px;
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
         }
         nav {
             display: flex;
@@ -96,9 +109,6 @@
         .post.priority-high {
             border-left: 5px solid var(--danger-color);
         }
-        .post.priority-normal {
-            border-left: 5px solid var(--accent-color);
-        }
         .post-title {
             font-weight: bold;
             font-size: 1.05rem;
@@ -160,141 +170,188 @@
             box-sizing: border-box;
             -webkit-overflow-scrolling: touch;
         }
+
+        /* ログイン画面のスタイル */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            z-index: 9999;
+        }
+        .login-box {
+            width: 90%;
+            max-width: 400px;
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+        #app-container {
+            display: none;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
 
-    <header>⛵ YACHT NAVI Lite</header>
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="text-align:center; margin-top:0; color:var(--accent-color);">⛵ YACHT NAVI ログイン</h2>
+            <p style="font-size:0.9rem; color:rgba(255,255,255,0.7); text-align:center;">部員用のIDとパスワードを入力してください</p>
+            
+            <label for="login-email">👤 配布されたID (メール)</label>
+            <input type="email" id="login-email" placeholder="例：t252034@edu.kaiyodai.ac.jp">
 
-    <nav>
-        <button id="nav-weather" class="active">☀️ 天気予報</button>
-        <button id="nav-bbs">📋 掲示板</button>
-        <button id="nav-maintenance">🛠️ ヨット管理</button>
-        <button id="nav-record">📝 練習記録</button>
-    </nav>
+            <label for="login-password" style="display:block; margin-top:15px;">🔒 パスワード</label>
+            <input type="password" id="login-password" placeholder="••••••••">
 
-    <div id="sec-weather" class="content-section active">
-        <h3>☀️ 江の島 天気・風速</h3>
-        <p>最新の気象データや海の状況を確認しましょう。</p>
-        
-        <div class="windguru-container">
-            <script id="wg_fwdg_167452_100_1781852440051">
-            (function (window, document) {
-              var loader = function () {
-                var arg = ["s=167452" ,"m=100","uid=wg_fwdg_167452_100_1781852440051" ,"wj=knots" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=240" ,"hrsm=2" ,"vt=forecasts" ,"lng=en" ,"idbs=1" ,"p=WINDSPD,GUST,SMER,TMPE,FLHGT,CDC,APCP1s,RATING"];
-                var script = document.createElement("script");
-                var tag = document.getElementsByTagName("script")[0];
-                script.src = "https://www.windguru.cz/js/widget.php?"+(arg.join("&"));
-                tag.parentNode.insertBefore(script, tag);
-              };
-              window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
-            })(window, document);
-            </script>
+            <button class="submit-btn" id="btn-login" style="margin-top:25px; background-color:var(--accent-color); color:white;">ログインする</button>
+        </div>
+    </div>
+
+    <div id="app-container">
+        <header>
+            ⛵ YACHT NAVI Lite
+            <button class="logout-btn" id="btn-logout">ログアウト</button>
+        </header>
+
+        <nav>
+            <button id="nav-weather" class="active">☀️ 天気予報</button>
+            <button id="nav-bbs">📋 掲示板</button>
+            <button id="nav-maintenance">🛠️ ヨット管理</button>
+            <button id="nav-record">📝 練習記録</button>
+        </nav>
+
+        <div id="sec-weather" class="content-section active">
+            <h3>☀️ 江の島 天気・風速</h3>
+            <p>最新の気象データや海の状況を確認しましょう。</p>
+            
+            <div class="windguru-container">
+                <script id="wg_fwdg_167452_100_1781852440051">
+                (function (window, document) {
+                  var loader = function () {
+                    var arg = ["s=167452" ,"m=100","uid=wg_fwdg_167452_100_1781852440051" ,"wj=knots" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=240" ,"hrsm=2" ,"vt=forecasts" ,"lng=en" ,"idbs=1" ,"p=WINDSPD,GUST,SMER,TMPE,FLHGT,CDC,APCP1s,RATING"];
+                    var script = document.createElement("script");
+                    var tag = document.getElementsByTagName("script")[0];
+                    script.src = "https://www.windguru.cz/js/widget.php?"+(arg.join("&"));
+                    tag.parentNode.insertBefore(script, tag);
+                  };
+                  window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
+                })(window, document);
+                </script>
+            </div>
+
+            <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn" style="margin-top: 20px;">
+                🌊 リビエラ公式ライブカメラを開く
+            </a>
         </div>
 
-        <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn" style="margin-top: 20px;">
-            🌊 リビエラ公式ライブカメラを開く
-        </a>
-    </div>
+        <div id="sec-bbs" class="content-section">
+            <h3>📋 部内共有掲示板</h3>
+            
+            <label for="bbs-title">📝 題名（タイトル）</label>
+            <input type="text" id="bbs-title" placeholder="例：今週末の集合時間について">
 
-    <div id="sec-bbs" class="content-section">
-        <h3>📋 部内共有掲示板</h3>
-        
-        <label for="bbs-title">📝 題名（タイトル）</label>
-        <input type="text" id="bbs-title" placeholder="例：今週末の集合時間について">
-
-        <label for="bbs-priority" style="display:block; margin-top:10px;">⚠️ 重要度</label>
-        <select id="bbs-priority">
-            <option value="normal">💬 通常連絡</option>
-            <option value="high">🚨 緊急・重要</option>
-        </select>
-
-        <label for="bbs-date" style="display:block; margin-top:10px;">📅 予定日・期限（任意）</label>
-        <input type="date" id="bbs-date">
-
-        <label for="bbs-input" style="display:block; margin-top:10px;">💬 本文（連絡内容）</label>
-        <textarea id="bbs-input" placeholder="詳しい連絡内容を入力してください..."></textarea>
-        
-        <button class="submit-btn" style="margin-top:15px;" id="btn-bbs-submit">投稿する</button>
-        
-        <div id="bbs-list" style="margin-top: 20px;"></div>
-    </div>
-
-    <div id="sec-maintenance" class="content-section">
-        <h3>🛠️ ヨット状態・整備管理</h3>
-        <h4>🔧 新しい整備・状態を記録</h4>
-        <label for="maint-date">📅 日付</label>
-        <input type="date" id="maint-date">
-
-        <label for="maint-class" style="display:block; margin-top:10px;">⛵ クラス</label>
-        <select id="maint-class">
-            <option value="">-- クラスを選択してください --</option>
-            <option value="470">470</option>
-            <option value="スナイプ">スナイプ</option>
-        </select>
-
-        <label for="maint-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
-        <select id="maint-boat" disabled>
-            <option value="">-- 先にクラスを選択してください --</option>
-        </select>
-
-        <label for="maint-text" style="display:block; margin-top:10px;">📝 整備メモ・セール管理状況</label>
-        <textarea id="maint-text" placeholder="整備箇所やセールの状態を入力..."></textarea>
-
-        <label for="maint-file" style="display:block; margin-top:10px;">📸 写真をアップロード</label>
-        <input type="file" id="maint-file" accept="image/*">
-        <img id="maint-preview" class="preview-img">
-
-        <button class="submit-btn" style="margin-top:20px;" id="btn-maint-submit">管理記録を保存</button>
-        
-        <div class="filter-area">
-            <label>🔍 表示する艇を絞り込む</label>
-            <select id="filter-boat">
-                <option value="all">🔄 すべての艇番を表示</option>
-                <option value="4237">470 - 4237</option>
-                <option value="4146">470 - 4146</option>
-                <option value="4706">470 - 4706</option>
-                <option value="4572">470 - 4572</option>
-                <option value="31594">スナイプ - 31594</option>
-                <option value="31287">スナイプ - 31287</option>
-                <option value="31245">スナイプ - 31245</option>
-                <option value="31067">スナイプ - 31067</option>
-                <option value="28675">スナイプ - 28675</option>
-                <option value="30575">スナイプ - 30575</option>
-                <option value="陸待or整備">陸待or整備</option>
+            <label for="bbs-priority" style="display:block; margin-top:10px;">⚠️ 重要度</label>
+            <select id="bbs-priority">
+                <option value="normal">💬 通常連絡</option>
+                <option value="high">🚨 緊急・重要</option>
             </select>
+
+            <label for="bbs-date" style="display:block; margin-top:10px;">📅 予定日・期限（任意）</label>
+            <input type="date" id="bbs-date">
+
+            <label for="bbs-input" style="display:block; margin-top:10px;">💬 本文（連絡内容）</label>
+            <textarea id="bbs-input" placeholder="詳しい連絡内容を入力してください..."></textarea>
+            
+            <button class="submit-btn" style="margin-top:15px;" id="btn-bbs-submit">投稿する</button>
+            
+            <div id="bbs-list" style="margin-top: 20px;"></div>
         </div>
-        <div id="maint-list"></div>
-    </div>
 
-    <div id="sec-record" class="content-section">
-        <h3>📝 練習記録</h3>
-        <label for="record-date">📅 日付</label>
-        <input type="date" id="record-date">
+        <div id="sec-maintenance" class="content-section">
+            <h3>🛠️ ヨット状態・整備管理</h3>
+            <h4>🔧 新しい整備・状態を記録</h4>
+            <label for="maint-date">📅 日付</label>
+            <input type="date" id="maint-date">
 
-        <label for="record-class" style="display:block; margin-top:10px;">⛵ クラス</label>
-        <select id="record-class">
-            <option value="">-- クラスを選択してください --</option>
-            <option value="470">470</option>
-            <option value="スナイプ">スナイプ</option>
-        </select>
+            <label for="maint-class" style="display:block; margin-top:10px;">⛵ クラス</label>
+            <select id="maint-class">
+                <option value="">-- クラスを選択してください --</option>
+                <option value="470">470</option>
+                <option value="スナイプ">スナイプ</option>
+            </select>
 
-        <label for="record-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
-        <select id="record-boat" disabled>
-            <option value="">-- 先にクラスを選択してください --</option>
-        </select>
+            <label for="maint-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
+            <select id="maint-boat" disabled>
+                <option value="">-- 先にクラスを選択してください --</option>
+            </select>
 
-        <label for="record-text" style="display:block; margin-top:10px;">📝 練習内容・反省点</label>
-        <textarea id="record-text" placeholder="今日の練習内容や反省点..."></textarea>
-        
-        <button class="submit-btn" id="btn-record-submit">記録を保存</button>
-        <div id="record-list"></div>
+            <label for="maint-text" style="display:block; margin-top:10px;">📝 整備メモ・セール管理状況</label>
+            <textarea id="maint-text" placeholder="整備箇所やセールの状態を入力..."></textarea>
+
+            <label for="maint-file" style="display:block; margin-top:10px;">📸 写真をアップロード</label>
+            <input type="file" id="maint-file" accept="image/*">
+            <img id="maint-preview" class="preview-img">
+
+            <button class="submit-btn" style="margin-top:20px;" id="btn-maint-submit">管理記録を保存</button>
+            
+            <div class="filter-area">
+                <label>🔍 表示する艇を絞り込む</label>
+                <select id="filter-boat">
+                    <option value="all">🔄 すべての艇番を表示</option>
+                    <option value="4237">470 - 4237</option>
+                    <option value="4146">470 - 4146</option>
+                    <option value="4706">470 - 4706</option>
+                    <option value="4572">470 - 4572</option>
+                    <option value="31594">スナイプ - 31594</option>
+                    <option value="31287">スナイプ - 31287</option>
+                    <option value="31245">スナイプ - 31245</option>
+                    <option value="31067">スナイプ - 31067</option>
+                    <option value="28675">スナイプ - 28675</option>
+                    <option value="30575">スナイプ - 30575</option>
+                    <option value="陸待or整備">陸待or整備</option>
+                </select>
+            </div>
+            <div id="maint-list"></div>
+        </div>
+
+        <div id="sec-record" class="content-section">
+            <h3>📝 練習記録</h3>
+            <label for="record-date">📅 日付</label>
+            <input type="date" id="record-date">
+
+            <label for="record-class" style="display:block; margin-top:10px;">⛵ クラス</label>
+            <select id="record-class">
+                <option value="">-- クラスを選択してください --</option>
+                <option value="470">470</option>
+                <option value="スナイプ">スナイプ</option>
+            </select>
+
+            <label for="record-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
+            <select id="record-boat" disabled>
+                <option value="">-- 先にクラスを選択してください --</option>
+            </select>
+
+            <label for="record-text" style="display:block; margin-top:10px;">📝 練習内容・反省点</label>
+            <textarea id="record-text" placeholder="今日の練習内容や反省点..."></textarea>
+            
+            <button class="submit-btn" id="btn-record-submit">記録を保存</button>
+            <div id="record-list"></div>
+        </div>
     </div>
 
     <script type="module">
         // --- Firebase初期設定 ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+        // 🔒 Authentication(認証機能)用のモジュールを追加
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCQ0eCrYy3xYLAis0b3g4FqqOaKeYRYJf8",
@@ -308,6 +365,60 @@
 
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
+        const auth = getAuth(app); // 認証インスタンスの作成
+
+        // --- 🔐 ログイン・ログアウト制御 ---
+        
+        // ログイン状態の監視
+        onAuthStateChanged(auth, (user) => {
+            const loginScreen = document.getElementById('login-screen');
+            const appContainer = document.getElementById('app-container');
+            
+            if (user) {
+                // ログインしている場合：アプリを表示してログイン画面を隠す
+                loginScreen.style.display = 'none';
+                appContainer.style.display = 'block';
+                // データの読み込み
+                loadRecords();
+                filterMaintenanceRecords();
+                loadBbsPosts();
+            } else {
+                // ログインしていない場合：ログイン画面を表示してアプリを隠す
+                loginScreen.style.display = 'flex';
+                appContainer.style.display = 'none';
+            }
+        });
+
+        // ログインボタンを押したときの処理
+        document.getElementById('btn-login').addEventListener('click', () => {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                alert('IDとパスワードを入力してください。');
+                return;
+            }
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // ログイン成功（onAuthStateChangedが検知して画面を切り替えます）
+                    alert('🎉 ログインに成功しました！');
+                })
+                .catch((error) => {
+                    console.error("Login error:", error);
+                    alert('❌ ログインに失敗しました。IDまたはパスワードが間違っています。');
+                });
+        });
+
+        // ログアウトボタンを押したときの処理
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                alert('🔓 ログアウトしました。');
+            }).catch((error) => {
+                alert('エラーが発生しました。');
+            });
+        });
+
 
         // --- アプリのロジック ---
         const boatData = {
@@ -407,8 +518,8 @@
                 return;
             }
             boatSelect.disabled = false;
-            boatData[selectedClass].forEach(boat => {
-                const option = document.createElement('option');
+            boatData[selectedClass].forEac(boat => {
+const option = document.createElement('option');
                 option.value = boat;
                 option.text = boat;
                 boatSelect.appendChild(option);
@@ -557,14 +668,10 @@
             });
         }
 
-        // 初期化処理
+        // 初期日付の設定
         const today = new Date().toISOString().split('T')[0];
         if(document.getElementById('record-date')) document.getElementById('record-date').value = today;
         if(document.getElementById('maint-date')) document.getElementById('maint-date').value = today;
-        
-        loadRecords();
-        filterMaintenanceRecords();
-        loadBbsPosts();
 
         function loadRecords() {
             const records = JSON.parse(localStorage.getItem('yacht_records')) || [];
@@ -573,4 +680,3 @@
     </script>
 </body>
 </html>
-             
