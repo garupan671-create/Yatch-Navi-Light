@@ -318,12 +318,11 @@
             <label for="maint-text" style="display:block; margin-top:10px;">📝 整備メモ・セール管理状況</label>
             <textarea id="maint-text" placeholder="整備箇所やセールの状態を入力..."></textarea>
 
-            <label for="maint-file" style="display:block; margin-top:10px;">📸 写真をアップロード</label>
-            <input type="file" id="maint-file" accept="image/*">
-            <img id="maint-preview" class="preview-img">
 
             <button class="submit-btn" style="margin-top:20px;" id="btn-maint-submit">管理記録を保存</button>
-            
+            <div class="search-area" style="margin-top: 20px;">
+    <input type="text" id="bbs-search" placeholder="🔍 過去の連絡をキーワード検索...">
+            </div>
             <div class="filter-area">
                 <label>🔍 表示する艇を絞り込む</label>
                 <select id="filter-boat">
