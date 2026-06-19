@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -145,7 +145,14 @@
     <div id="sec-weather" class="content-section active">
         <h3>☀️ 江の島 天気・風速</h3>
         <p>最新の気象データや海の状況を確認しましょう。</p>
-        <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn">
+        
+        <div style="width: 100%; overflow-x: auto; margin-top: 15px; border-radius: 5px;">
+            <iframe src="https://www.windguru.cz/widget/?s=208567&m=3&p=WIND,GUST,SMER,TMP" 
+                    style="width: 100%; height: 350px; border: none;">
+            </iframe>
+        </div>
+
+        <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn" style="margin-top: 20px;">
             🌊 リビエラ公式ライブカメラを開く
         </a>
     </div>
@@ -435,6 +442,3 @@
     </script>
 </body>
 </html>
-           
-
-        
