@@ -1,5 +1,229 @@
-                         
-                        <label for="record-text" style="display:block; margin-top:10px;">📝 練習内容・反省点</label>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YACHT NAVI Lite</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --bg-color: #0b132b;
+            --card-bg: #1c2541;
+            --text-color: #ffffff;
+            --accent-color: #4ea8de;
+            --btn-bg: #5bc0be;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            background-color: var(--card-bg);
+            width: 100%;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 2px solid var(--accent-color);
+        }
+        nav {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 10px 0;
+        }
+        nav button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        nav button.active {
+            background-color: var(--accent-color);
+        }
+        .content-section {
+            display: none;
+            width: 90%;
+            max-width: 500px;
+            margin-top: 20px;
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+        .content-section.active {
+            display: block;
+        }
+        input, textarea, select, button.submit-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-color);
+            box-sizing: border-box;
+        }
+        select option {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+        button.submit-btn {
+            background-color: var(--btn-bg);
+            color: var(--bg-color);
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .post {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid var(--accent-color);
+        }
+        .post-title {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+        .preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .uploaded-img {
+            max-width: 100%;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .filter-area {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            border: 1px dashed var(--accent-color);
+        }
+        .live-btn {
+            display: block;
+            text-align: center;
+            background-color: #4ea8de;
+            color: white;
+            padding: 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>⛵ YACHT NAVI Lite</header>
+
+    <nav>
+        <button id="nav-weather" class="active" onclick="switchTab('weather')">☀️ 天気予報</button>
+        <button id="nav-bbs" onclick="switchTab('bbs')">📋 掲示板</button>
+        <button id="nav-maintenance" onclick="switchTab('maintenance')">🛠️ ヨット管理</button>
+        <button id="nav-record" onclick="switchTab('record')">📝 練習記録</button>
+    </nav>
+
+    <div id="sec-weather" class="content-section active">
+        <h3>☀️ 江の島 天気・風速</h3>
+        <p>最新の気象データや海の状況を確認しましょう。</p>
+        <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn">
+            🌊 リビエラ公式ライブカメラを開く
+        </a>
+    </div>
+
+    <div id="sec-bbs" class="content-section">
+        <h3>📋 部内共有掲示板</h3>
+        <textarea id="bbs-input" placeholder="連絡事項を入力してください..."></textarea>
+        <button class="submit-btn" onclick="addPost()">投稿する</button>
+        <div id="bbs-list"></div>
+    </div>
+
+    <div id="sec-maintenance" class="content-section">
+        <h3>🛠️ ヨット状態・整備管理</h3>
+        
+        <h4>🔧 新しい整備・状態を記録</h4>
+        <label for="maint-date">📅 日付</label>
+        <input type="date" id="maint-date">
+
+        <label for="maint-class" style="display:block; margin-top:10px;">⛵ クラス</label>
+        <select id="maint-class" onchange="updateMaintBoatOptions()">
+            <option value="">-- クラスを選択してください --</option>
+            <option value="470">470</option>
+            <option value="スナイプ">スナイプ</option>
+        </select>
+
+        <label for="maint-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
+        <select id="maint-boat" disabled>
+            <option value="">-- 先にクラスを選択してください --</option>
+        </select>
+
+        <label for="maint-text" style="display:block; margin-top:10px;">📝 整備メモ・セール管理状況</label>
+        <textarea id="maint-text" placeholder="整備箇所やセールの状態（例：メインセール新調など）を入力..."></textarea>
+
+        <label for="maint-file" style="display:block; margin-top:10px;">📸 写真をアップロード</label>
+        <input type="file" id="maint-file" accept="image/*" onchange="previewMaintImage(this)">
+        <img id="maint-preview" class="preview-img">
+
+        <button class="submit-btn" style="margin-top:20px;" onclick="addMaintenanceRecord()">管理記録を保存</button>
+        
+        <div class="filter-area">
+            <label>🔍 表示する艇を絞り込む</label>
+            <select id="filter-boat" onchange="filterMaintenanceRecords()">
+                <option value="all">🔄 すべての艇番を表示</option>
+                <option value="4237">470 - 4237</option>
+                <option value="4146">470 - 4146</option>
+                <option value="4706">470 - 4706</option>
+                <option value="4572">470 - 4572</option>
+                <option value="31594">スナイプ - 31594</option>
+                <option value="31287">スナイプ - 31287</option>
+                <option value="31245">スナイプ - 31245</option>
+                <option value="31067">スナイプ - 31067</option>
+                <option value="28675">スナイプ - 28675</option>
+                <option value="30575">スナイプ - 30575</option>
+                <option value="陸待or整備">陸待or整備</option>
+            </select>
+        </div>
+
+        <div id="maint-list"></div>
+    </div>
+
+    <div id="sec-record" class="content-section">
+        <h3>📝 練習記録</h3>
+        <label for="record-date">📅 日付</label>
+        <input type="date" id="record-date">
+
+        <label for="record-class" style="display:block; margin-top:10px;">⛵ クラス</label>
+        <select id="record-class" onchange="updateBoatOptions()">
+            <option value="">-- クラスを選択してください --</option>
+            <option value="470">470</option>
+            <option value="スナイプ">スナイプ</option>
+        </select>
+
+        <label for="record-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
+        <select id="record-boat" disabled>
+            <option value="">-- 先にクラスを選択してください --</option>
+        </select>
+
+        <label for="record-text" style="display:block; margin-top:10px;">📝 練習内容・反省点</label>
         <textarea id="record-text" placeholder="今日の練習内容や反省点..."></textarea>
         
         <button class="submit-btn" onclick="addRecord()">記録を保存</button>
