@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -344,6 +344,9 @@
             document.getElementById('maint-preview').style.display = 'none';
             currentMaintImageBase64 = "";
 
+            // 保存完了のアラートを表示
+            alert('🎉 ヨット管理記録を保存しました！');
+
             // 保存後に一覧を更新
             filterMaintenanceRecords();
         }
@@ -394,8 +397,9 @@
             const record = { date: date, yachClass: yachClass, boat: boat, text: text };
             let records = JSON.parse(localStorage.getItem('yacht_records')) || [];
             records.unshift(record);
-            localStorage.setItem('yacht_records', JSON.stringify(withStringify));
+            localStorage.setItem('yacht_records', JSON.stringify(records));
 
+            alert('🎉 練習記録を保存しました！');
             displayRecords(records);
             document.getElementById('record-text').value = '';
         }
@@ -431,3 +435,6 @@
     </script>
 </body>
 </html>
+           
+
+        
