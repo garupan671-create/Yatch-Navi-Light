@@ -129,6 +129,18 @@
             font-weight: bold;
             margin-top: 15px;
         }
+        /* Windguruウィジェット用のレスポンシブコンテナ */
+        .windguru-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #000000;
+            padding: 5px;
+            box-sizing: border-box;
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
 <body>
@@ -146,10 +158,19 @@
         <h3>☀️ 江の島 天気・風速</h3>
         <p>最新の気象データや海の状況を確認しましょう。</p>
         
-        <div style="width: 100%; overflow-x: auto; margin-top: 15px; border-radius: 5px; background: #fff; -webkit-overflow-scrolling: touch;">
-            <iframe src="https://widget.windguru.cz/index.php?sc=208567&amp;sty=m_default&amp;p=WIND,GUST,SMER,TMP" 
-                    style="width: 650px; height: 350px; border: none;">
-            </iframe>
+        <div class="windguru-container">
+            <script id="wg_fwdg_167452_100_1781852440051">
+            (function (window, document) {
+              var loader = function () {
+                var arg = ["s=167452" ,"m=100","uid=wg_fwdg_167452_100_1781852440051" ,"wj=knots" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=240" ,"hrsm=2" ,"vt=forecasts" ,"lng=en" ,"idbs=1" ,"p=WINDSPD,GUST,SMER,TMPE,FLHGT,CDC,APCP1s,RATING"];
+                var script = document.createElement("script");
+                var tag = document.getElementsByTagName("script")[0];
+                script.src = "https://www.windguru.cz/js/widget.php?"+(arg.join("&"));
+                tag.parentNode.insertBefore(script, tag);
+              };
+              window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
+            })(window, document);
+            </script>
         </div>
 
         <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn" style="margin-top: 20px;">
@@ -442,4 +463,3 @@
     </script>
 </body>
 </html>
-
