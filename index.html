@@ -83,6 +83,17 @@
             border-radius: 5px;
             margin-top: 10px;
         }
+        .live-btn {
+            display: block;
+            text-align: center;
+            background-color: #4ea8de;
+            color: white;
+            padding: 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -98,7 +109,10 @@
 
     <div id="sec-weather" class="content-section active">
         <h3>☀️ 江の島 天気・風速</h3>
-        <p>予報データがここに表示されます（調整中）</p>
+        <p>最新の気象データや海の状況を確認しましょう。</p>
+        <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn">
+            🌊 リビエラ公式ライブカメラを開く
+        </a>
     </div>
 
     <div id="sec-bbs" class="content-section">
@@ -111,6 +125,9 @@
     <div id="sec-camera" class="content-section">
         <h3>📹 ライブカメラ</h3>
         <p>海の状況を確認しましょう。</p>
+        <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn">
+            🌊 リビエラ公式ライブカメラを開く
+        </a>
     </div>
 
     <div id="sec-record" class="content-section">
@@ -122,7 +139,6 @@
     </div>
 
     <script>
-        // タブ切り替えのプログラム
         function switchTab(tabId) {
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
@@ -131,7 +147,6 @@
             document.getElementById('nav-' + tabId).classList.add('active');
         }
 
-        // 掲示板の投稿プログラム
         function addPost() {
             const input = document.getElementById('bbs-input');
             if (!input.value.trim()) return;
@@ -144,7 +159,6 @@
             input.value = '';
         }
 
-        // 練習記録の保存プログラム
         function addRecord() {
             const title = document.getElementById('record-title');
             const text = document.getElementById('record-text');
@@ -161,4 +175,5 @@
     </script>
 </body>
 </html>
+
 
