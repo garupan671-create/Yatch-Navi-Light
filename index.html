@@ -1,312 +1,931 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ヨット部 ナビアプリ</title>
-  <style>
-    /* 簡易スタイル定義 🎨 */
-    body { font-family: sans-serif; margin: 20px; }
-    .content-section { display: none; }
-    .content-section.active { display: block; }
-    nav button { margin-right: 5px; padding: 8px 12px; }
-    nav button.active { font-weight: bold; background-color: #ddd; }
-  </style>
-</head>
-<body>
-
-  <div id="login-screen" style="display: flex; flex-direction: column; gap: 10px; max-width: 300px;">
-    <h2>🔐 ログイン</h2>
-    <input type="email" id="login-email" placeholder="メールアドレス">
-    <input type="password" id="login-password" placeholder="パスワード">
-    <button id="btn-login">ログイン</button>
-  </div>
-
-  <div id="name-setup-screen" style="display: none; flex-direction: column; gap: 10px; max-width: 300px;">
-    <h2>👤 お名前の登録</h2>
-    <input type="text" id="user-display-name" placeholder="部員名を入力">
-    <button id="btn-save-name">保存</button>
-  </div>
-
-  <div id="app-container" style="display: none;">
-    <header style="display: flex; justify-content: space-between; align-items: center;">
-      <h3 id="welcome-msg"></h3>
-      <button id="btn-logout">ログアウト</button>
-    </header>
-
-    <nav style="margin-bottom: 20px;">
-      <button id="nav-record" class="active">記録</button>
-      <button id="nav-maintenance">整備</button>
-      <button id="nav-bbs">掲示板</button>
-      <button id="nav-weather">天気</button>
-      <button id="nav-tools">備品管理</button>
-    </nav>
-
-    <div id="sec-record" class="content-section active">
-      <h2>📝 出艇・練習記録</h2>
-      <p>ここに記録画面が入ります。</p>
-    </div>
-
-    <div id="sec-maintenance" class="content-section">
-      <h2>🛠️ 整備記録</h2>
-      <p>ここに整備画面が入ります。</p>
-    </div>
-
-    <div id="sec-bbs" class="content-section">
-      <h2>💬 掲示板</h2>
-      <p>ここに掲示板が入ります。</p>
-    </div>
-
-    <div id="sec-weather" class="content-section">
-      <h2>☀️ 天気情報</h2>
-      <p>ここに天気情報が入ります。</p>
-    </div>
-
-    <div id="sec-tools" class="content-section">
-      <h2>📦 備品・工具一覧</h2>
-      <div id="tools-list">データを読み込んでいます...</div>
-    </div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCQ0eCrYy3xYLAis0b3g4FqqOaKeYRYJf8",
-      authDomain: "yacht-navi-app.firebaseapp.com",
-      projectId: "yacht-navi-app",
-      storageBucket: "yacht-navi-app.firebasestorage.app",
-      messagingSenderId: "724690722034",
-      appId: "1:724690722034:web:bbe564c44ee6eec06e846b",
-      measurementId: "G-22RYBZG8MW"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    let currentUserName = "未設定部員";
-    let currentUserUid = "";
-
-    // 📋 初期データリスト（全項目反映）
-    const initialTools = [
-      // 📐 計測用
-      { name: "テンションゲージ", location: "計測用", memo: "5" },
-      { name: "メジャー", location: "計測用", memo: "2" },
-      { name: "銀テ", location: "計測用", memo: "1" },
-      { name: "セールの切れ端", location: "計測用", memo: "1" },
-      { name: "直角定規", location: "計測用", memo: "2" },
-      { name: "ライター", location: "計測用", memo: "5" },
-      { name: "タイラップ", location: "計測用", memo: "たくさん" },
-      { name: "ハケ", location: "計測用", memo: "1" },
-      { name: "風見", location: "計測用", memo: "たくさん" },
-      { name: "マーカー", location: "計測用", memo: "3(黒:2,赤:1)" },
-
-      // 🧰 工具用
-      { name: "バスコーク", location: "工具用", memo: "5" },
-      { name: "マーロウ", location: "工具用", memo: "1" },
-      { name: "養生テープ", location: "工具用", memo: "2" },
-      { name: "透明テープ", location: "工具用", memo: "1" },
-      { name: "ランチャー問題対処チェーン", location: "工具用", memo: "2" },
-      { name: "マイナスドライバー", location: "工具用", memo: "3" },
-      { name: "プラスドライバー", location: "工具用", memo: "7" },
-      { name: "キリ", location: "工具用", memo: "1" },
-      { name: "レンチ", location: "工具用", memo: "青セット1個と9本" },
-      { name: "六角レンチ", location: "工具用", memo: "1セット" },
-      { name: "ハンマー", location: "工具用", memo: "1" },
-      { name: "ハトメ用の何か", location: "工具用", memo: "2" },
-      { name: "ハトメ", location: "工具用", memo: "たくさん" },
-      { name: "ポンチ", location: "工具用", memo: "1" },
-      { name: "工具3個セット", location: "工具用", memo: "1" },
-      { name: "ハサミ", location: "工具用", memo: "1" },
-      { name: "カーボン剥がし用ベラ", location: "工具用", memo: "1" },
-      { name: "バイス", location: "工具用", memo: "1" },
-      { name: "接着剤", location: "工具用", memo: "1" },
-      { name: "ワイヤーカッター", location: "工具用", memo: "1" },
-
-      // 🛥️ テンダーボックス
-      { name: "マイナスドライバー", location: "テンダーボックス", memo: "3" },
-      { name: "ギアオイル", location: "テンダーボックス", memo: "2" },
-      { name: "ドレンプラグガスケット", location: "テンダーボックス", memo: "いっぱい" },
-      { name: "エアフィルター", location: "テンダーボックス", memo: "1" },
-      { name: "グリースニップル", location: "テンダーボックス", memo: "ひと袋" },
-      { name: "グリースを充填するやつ（中身あり）", location: "テンダーボックス", memo: "1" },
-      { name: "結束バンド", location: "テンダーボックス", memo: "ひと袋" },
-      { name: "Y字レンチ", location: "テンダーボックス", memo: "1" },
-      { name: "プライヤー（錆びた）", location: "テンダーボックス", memo: "1" },
-      { name: "船外機整備手帳", location: "テンダーボックス", memo: "1" },
-      { name: "船検関連の書類", location: "テンダーボックス", memo: "" },
-      { name: "レスキュー艇管理マニュアル", location: "テンダーボックス", memo: "" },
-      { name: "ヤマハグリース", location: "テンダーボックス", memo: "" },
-      { name: "ベルトレンチ", location: "テンダーボックス", memo: "1" },
-      { name: "パンク修理キット", location: "テンダーボックス", memo: "2" },
-
-      // 🎨 スプレーボックス
-      { name: "クリエイティブカラースプレーゴールド", location: "スプレーボックス", memo: "1" },
-      { name: "クリエイティブカラースプレーグリーン", location: "スプレーボックス", memo: "1" },
-      { name: "蛍光スプレー", location: "スプレーボックス", memo: "1" },
-      { name: "シリコンラッカースプレー", location: "スプレーボックス", memo: "1" },
-      { name: "セールコートスプレー", location: "スプレーボックス", memo: "1" },
-      { name: "マルチ密着プライマー", location: "スプレーボックス", memo: "1" },
-      { name: "ラッカーマーキングスプレー", location: "スプレーボックス", memo: "1" },
-      { name: "KURE3-36", location: "スプレーボックス", memo: "1" },
-      { name: "UVプロテクトワックス", location: "スプレーボックス", memo: "1" },
-      { name: "マリーンワンステップワックス", location: "スプレーボックス", memo: "1" },
-      { name: "超微粒子コンパウンド", location: "スプレーボックス", memo: "" },
-      { name: "絵の具（赤）", location: "スプレーボックス", memo: "1" },
-
-      // 📦 その他
-      { name: "アセトン", location: "その他", memo: "1" },
-      { name: "ポリエステル樹脂", location: "その他", memo: "1" },
-      { name: "FRP洗浄液", location: "その他", memo: "1" },
-      { name: "FRP修理用A剤", location: "その他", memo: "" },
-      { name: "シリコンコーク", location: "その他", memo: "1" },
-      { name: "シリコンガン", location: "その他", memo: "1" },
-      { name: "ショッピングバッグ", location: "その他", memo: "それなりに" },
-      { name: "ピンマーク", location: "その他", memo: "1" },
-      { name: "女子用品", location: "その他", memo: "1" },
-      { name: "クランプ", location: "その他", memo: "6" },
-      { name: "トルクレンチ", location: "その他", memo: "1" },
-      { name: "グラインダー", location: "その他", memo: "1" },
-      { name: "延長コード", location: "その他", memo: "1" },
-      { name: "ラダーヘット", location: "その他", memo: "1" },
-      { name: "ろうと", location: "その他", memo: "1" },
-      { name: "ガラス繊維", location: "その他", memo: "2袋" },
-      { name: "エフコテープ", location: "その他", memo: "" },
-      { name: "水道ホース", location: "その他", memo: "" },
-      { name: "リベット", location: "その他", memo: "いっぱい" },
-      { name: "モンキーレンチ", location: "その他", memo: "1" },
-      { name: "バイスプライヤー（錆び）", location: "その他", memo: "1" },
-      { name: "布団乾燥機", location: "その他", memo: "1" },
-      { name: "ノコギリ", location: "その他", memo: "2種類" },
-      { name: "切られたまな板", location: "その他", memo: "センターボード用？" },
-      { name: "バッテリー充電器", location: "その他", memo: "" },
-      { name: "はかり", location: "その他", memo: "2kgまで" },
-      { name: "ドライヤー", location: "その他", memo: "" }
-    ];
-
-    // ⚙️ 初回データ初期化
-    async function checkAndInitTools() {
-      try {
-        const toolsRef = collection(db, "tools");
-        const snapshot = await getDocs(toolsRef);
-        if (snapshot.empty) {
-          for (const tool of initialTools) {
-            await addDoc(toolsRef, tool);
-          }
+<!DOCTYPE html><html lang="ja"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YACHT NAVI Lite</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --bg-color: #0b132b;
+            --card-bg: #1c2541;
+            --text-color: #ffffff;
+            --accent-color: #4ea8de;
+            --btn-bg: #5bc0be;
+            --danger-color: #ff4757;
         }
-      } catch (error) {
-        console.error("初期データ登録エラー:", error);
-      }
-    }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            background-color: var(--card-bg);
+            width: 100%;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 2px solid var(--accent-color);
+            position: relative;
+        }
+        .logout-btn {
+            position: absolute;
+            right: 15px;
+            top: 12px;
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        nav {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 10px 0;
+            flex-wrap: wrap;
+        }
+        nav button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 0.85rem;
+            padding: 8px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 2px;
+        }
+        nav button.active {
+            background-color: var(--accent-color);
+        }
+        .content-section {
+            display: none;
+            width: 90%;
+            max-width: 500px;
+            margin-top: 20px;
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+        .content-section.active {
+            display: block;
+        }
+        input, textarea, select, button.submit-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-color);
+            box-sizing: border-box;
+        }
+        select option {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+        button.submit-btn {
+            background-color: var(--btn-bg);
+            color: var(--bg-color);
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .post {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid var(--accent-color);
+        }
+        .post.priority-high {
+            border-left: 5px solid var(--danger-color);
+        }
+        .post-title {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 5px;
+            color: #fff;
+        }
+        .badge-high { background-color: var(--danger-color); }
+        .badge-normal { background-color: rgba(255,255,255,0.2); }
+        .badge-date { background-color: #ffa502; color: #000; }
+        .badge-user { background-color: #a855f7; color: white; }
+        .badge-loc { background-color: #2ed573; color: black; }
 
-    // 📱 備品データの読み込み表示
-    async function loadTools() {
-      const toolsList = document.getElementById('tools-list');
-      if (!toolsList) return;
-
-      try {
-        const toolsRef = collection(db, "tools");
-        const snapshot = await getDocs(toolsRef);
-
-        if (snapshot.empty) {
-          toolsList.innerHTML = "<p>備品が登録されていません。</p>";
-          return;
+        .filter-area {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            border: 1px dashed var(--accent-color);
+        }
+        .live-btn {
+            display: block;
+            text-align: center;
+            background-color: #4ea8de;
+            color: white;
+            padding: 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .windguru-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #000000;
+            padding: 5px;
+            box-sizing: border-box;
+            -webkit-overflow-scrolling: touch;
         }
 
-        let html = '<ul style="list-style: none; padding: 0;">';
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          html += `
-            <li style="padding: 10px; border-bottom: 1px solid #ddd; margin-bottom: 5px; background: #f9f9f9; border-radius: 4px;">
-              <strong>🏷️ ${data.name}</strong> 
-              <span style="color: #666; font-size: 0.9em;">(場所: ${data.location || '未設定'})</span><br>
-              <small style="color: #888;">📝 数量・メモ: ${data.memo || 'なし'}</small>
-            </li>
-          `;
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            z-index: 9999;
+        }
+        .login-box {
+            width: 90%;
+            max-width: 400px;
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+        #app-container {
+            display: none;
+            width: 100%;
+        }
+
+        /* 👤 名前設定用ポップアップ */
+        #name-setup-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(11, 19, 43, 0.95);
+            z-index: 10000;
+        }
+    </style></head><body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="text-align:center; margin-top:0; color:var(--accent-color);">⛵ YACHT NAVI ログイン</h2>
+            <p style="font-size:0.9rem; color:rgba(255,255,255,0.7); text-align:center;">部員用のIDとパスワードを入力してください</p>
+            
+            <label for="login-email">👤 配布されたID (メール)</label>
+            <input type="email" id="login-email" placeholder="例：t252034@edu.kaiyodai.ac.jp">
+
+            <label for="login-password" style="display:block; margin-top:15px;">🔒 パスワード</label>
+            <input type="password" id="login-password" placeholder="••••••••">
+
+            <button class="submit-btn" id="btn-login" style="margin-top:25px; background-color:var(--accent-color); color:white;">ログインする</button>
+        </div>
+    </div>
+
+    <div id="name-setup-screen">
+        <div class="login-box">
+            <h3 style="text-align:center; margin-top:0; color:var(--accent-color);">👤 部員名の登録</h3>
+            <p style="font-size:0.9rem; color:rgba(255,255,255,0.7); text-align:center;">掲示板や記録に表示されるあなたの名前を設定してください。</p>
+            <input type="text" id="user-display-name" placeholder="例：海大 太郎">
+            <button class="submit-btn" id="btn-save-name" style="margin-top:20px;">名前を確定する</button>
+        </div>
+    </div>
+
+    <div id="app-container">
+        <header>
+            <span id="welcome-msg" style="font-size:0.85rem; position:absolute; left:15px; top:16px; color:rgba(255,255,255,0.6);"></span>
+            ⛵ YACHT NAVI Lite
+            <button class="logout-btn" id="btn-logout">ログアウト</button>
+        </header>
+
+        <nav>
+            <button id="nav-weather" class="active">☀️ 天気予報</button>
+            <button id="nav-bbs">📋 掲示板</button>
+            <button id="nav-record">📝 練習記録</button>
+            <button id="nav-maintenance">🛠️ ヨット管理</button>
+            <button id="nav-tools">📦 備品管理</button>
+        </nav>
+
+        <div id="sec-weather" class="content-section active">
+            <h3>☀️ 江の島 天気・風速</h3>
+            <p>最新の気象データや海の状況を確認しましょう。</p>
+            
+            <div class="windguru-container">
+                <script id="wg_fwdg_167452_100_1781852440051">
+                (function (window, document) {
+                  var loader = function () {
+                    var arg = ["s=167452" ,"m=100","uid=wg_fwdg_167452_100_1781852440051" ,"wj=knots" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=240" ,"hrsm=2" ,"vt=forecasts" ,"lng=en" ,"idbs=1" ,"p=WINDSPD,GUST,SMER,TMPE,FLHGT,CDC,APCP1s,RATING"];
+                    var script = document.createElement("script");
+                    var tag = document.getElementsByTagName("script")[0];
+                    script.src = "https://www.windguru.cz/js/widget.php?"+(arg.join("&"));
+                    tag.parentNode.insertBefore(script, tag);
+                  };
+                  window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
+                })(window, document);
+                </script>
+            </div>
+
+            <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn" style="margin-top: 20px;">
+                🌊 リビエラ公式ライブカメラを開く
+            </a>
+
+            <div id="weather-bbs-alerts" style="margin-top: 25px; display: none;">
+                <h4 style="color: var(--accent-color); margin-bottom: 10px;">🚨 間近の予定・連絡</h4>
+                <div id="alert-list"></div>
+            </div>
+        </div>
+
+        <div id="sec-bbs" class="content-section">
+            <h3>📋 部内共有掲示板</h3>
+            
+            <label for="bbs-title">📝 題名（タイトル）</label>
+            <input type="text" id="bbs-title" placeholder="例：今週末の集合時間について">
+
+            <label for="bbs-priority" style="display:block; margin-top:10px;">⚠️ 重要度</label>
+            <select id="bbs-priority">
+                <option value="normal">💬 通常連絡</option>
+                <option value="high">🚨 緊急・重要</option>
+            </select>
+
+            <label for="bbs-date" style="display:block; margin-top:10px;">📅 予定日・期限（任意）</label>
+            <input type="date" id="bbs-date">
+
+            <label for="bbs-input" style="display:block; margin-top:10px;">💬 本文（連絡内容）</label>
+            <textarea id="bbs-input" placeholder="詳しい連絡内容を入力してください..."></textarea>
+            
+            <button class="submit-btn" style="margin-top:15px;" id="btn-bbs-submit">投稿する</button>
+            
+            <div class="search-area" style="margin-top: 20px;">
+                <input type="text" id="bbs-search" placeholder="🔍 過去の連絡をキーワード検索...">
+            </div>
+            
+            <div id="bbs-list" style="margin-top: 20px;"></div>
+        </div>
+
+        <div id="sec-record" class="content-section">
+            <h3>📝 練習記録</h3>
+            <label for="record-date">📅 日付</label>
+            <input type="date" id="record-date">
+
+            <label for="record-class" style="display:block; margin-top:10px;">⛵ クラス</label>
+            <select id="record-class">
+                <option value="">-- クラスを選択してください --</option>
+                <option value="470">470</option>
+                <option value="スナイプ">スナイプ</option>
+                <option value="レスキュー艇">レスキュー艇</option>
+            </select>
+
+            <label for="record-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
+            <select id="record-boat" disabled>
+                <option value="">-- 先にクラスを選択してください --</option>
+            </select>
+
+            <label for="record-text" style="display:block; margin-top:10px;">📝 練習内容・反省点</label>
+            <textarea id="record-text" placeholder="今日の練習内容や反省点..."></textarea>
+            
+            <button class="submit-btn" id="btn-record-submit">記録を保存</button>
+            <div id="record-list" style="margin-top: 20px;"></div>
+        </div>
+
+        <div id="sec-maintenance" class="content-section">
+            <h3>🛠️ ヨット状態・整備管理</h3>
+            <h4>🔧 新しい整備・状態を記録</h4>
+            <label for="maint-date">📅 日付</label>
+            <input type="date" id="maint-date">
+
+            <label for="maint-class" style="display:block; margin-top:10px;">⛵ クラス</label>
+            <select id="maint-class">
+                <option value="">-- クラスを選択してください --</option>
+                <option value="470">470</option>
+                <option value="スナイプ">スナイプ</option>
+                <option value="レスキュー艇">レスキュー艇</option>
+            </select>
+
+            <label for="maint-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
+            <select id="maint-boat" disabled>
+                <option value="">-- 先にクラスを選択してください --</option>
+            </select>
+
+            <label for="maint-text" style="display:block; margin-top:10px;">📝 整備メモ・セール管理状況</label>
+            <textarea id="maint-text" placeholder="整備箇所やセールの状態を入力..."></textarea>
+
+            <button class="submit-btn" style="margin-top:20px;" id="btn-maint-submit">管理記録を保存</button>
+            
+            <div class="filter-area">
+                <label>🔍 表示する艇を絞り込む</label>
+                <select id="filter-boat">
+                    <option value="all">🔄 すべての艇番を表示</option>
+                    <option value="4237">470 - 4237</option>
+                    <option value="4146">470 - 4146</option>
+                    <option value="4706">470 - 4706</option>
+                    <option value="4572">470 - 4572</option>
+                    <option value="ネプチューン">レスキュー艇 - ネプチューン</option>
+                    <option value="パルパロ5">レスキュー艇 - パルパロ5</option>
+                    <option value="牛若丸">レスキュー艇 - 牛若丸</option>
+                    <option value="31594">スナイプ - 31594</option>
+                    <option value="31287">スナイプ - 31287</option>
+                    <option value="31245">スナイプ - 31245</option>
+                    <option value="31067">スナイプ - 31067</option>
+                    <option value="28675">スナイプ - 28675</option>
+                    <option value="30575">スナイプ - 30575</option>
+                    <option value="陸待or整備">陸待or整備</option>
+                </select>
+            </div>
+            <div id="maint-list" style="margin-top: 20px;"></div>
+        </div>
+
+        <div id="sec-tools" class="content-section">
+            <h3>📦 備品・工具管理一覧</h3>
+            <p style="font-size:0.85rem; color:rgba(255,255,255,0.7);">現在部内で管理されている備品・工具の初期データリストです。</p>
+            <div class="search-area" style="margin-top: 15px;">
+                <input type="text" id="tools-search" placeholder="🔍 備品名や場所を検索...">
+            </div>
+            <div id="tools-list" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // Firebase設定（yacht-navi-app）
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQ0eCrYy3xYLAis0b3g4FqqOaKeYRYJf8",
+            authDomain: "yacht-navi-app.firebaseapp.com",
+            projectId: "yacht-navi-app",
+            storageBucket: "yacht-navi-app.firebasestorage.app",
+            messagingSenderId: "724690722034",
+            appId: "1:724690722034:web:bbe564c44ee6eec06e846b",
+            measurementId: "G-22RYBZG8MW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserName = "未設定部員";
+        let currentUserUid = "";
+
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyP8-MWJyATLOuhDT79pJZftV0agLCw6cgOaRLzmzK35Aogcti5uI4X2KEx84tMKuBG/exec";
+
+        // 📋 備品初期データリスト
+        const initialTools = [
+            // 計測用
+            { name: "テンションゲージ", location: "計測用", memo: "5" },
+            { name: "メジャー", location: "計測用", memo: "2" },
+            { name: "銀テ", location: "計測用", memo: "1" },
+            { name: "セールの切れ端", location: "計測用", memo: "1" },
+            { name: "直角定規", location: "計測用", memo: "2" },
+            { name: "ライター", location: "計測用", memo: "5" },
+            { name: "タイラップ", location: "計測用", memo: "たくさん" },
+            { name: "ハケ", location: "計測用", memo: "1" },
+            { name: "風見", location: "計測用", memo: "たくさん" },
+            { name: "マーカー", location: "計測用", memo: "3(黒:2,赤:1)" },
+
+            // 工具用
+            { name: "バスコーク", location: "工具用", memo: "5" },
+            { name: "マーロウ", location: "工具用", memo: "1" },
+            { name: "養生テープ", location: "工具用", memo: "2" },
+            { name: "透明テープ", location: "工具用", memo: "1" },
+            { name: "ランチャー問題対処チェーン", location: "工具用", memo: "2" },
+            { name: "マイナスドライバー", location: "工具用", memo: "3" },
+            { name: "プラスドライバー", location: "工具用", memo: "7" },
+            { name: "キリ", location: "工具用", memo: "1" },
+            { name: "レンチ", location: "工具用", memo: "青セット1個と9本" },
+            { name: "六角レンチ", location: "工具用", memo: "1セット" },
+            { name: "ハンマー", location: "工具用", memo: "1" },
+            { name: "ハトメ用の何か", location: "工具用", memo: "2" },
+            { name: "ハトメ", location: "工具用", memo: "たくさん" },
+            { name: "ポンチ", location: "工具用", memo: "1" },
+            { name: "工具3個セット", location: "工具用", memo: "1" },
+            { name: "ハサミ", location: "工具用", memo: "1" },
+            { name: "カーボン剥がし用ベラ", location: "工具用", memo: "1" },
+            { name: "バイス", location: "工具用", memo: "1" },
+            { name: "接着剤", location: "工具用", memo: "1" },
+            { name: "ワイヤーカッター", location: "工具用", memo: "1" },
+
+            // テンダーボックス
+            { name: "マイナスドライバー", location: "テンダーボックス", memo: "3" },
+            { name: "ギアオイル", location: "テンダーボックス", memo: "2" },
+            { name: "ドレンプラグガスケット", location: "テンダーボックス", memo: "いっぱい" },
+            { name: "エアフィルター", location: "テンダーボックス", memo: "1" },
+            { name: "グリースニップル", location: "テンダーボックス", memo: "ひと袋" },
+            { name: "グリースを充填するやつ（中身あり）", location: "テンダーボックス", memo: "1" },
+            { name: "結束バンド", location: "テンダーボックス", memo: "ひと袋" },
+            { name: "Y字レンチ", location: "テンダーボックス", memo: "1" },
+            { name: "プライヤー（錆びた）", location: "テンダーボックス", memo: "1" },
+            { name: "船外機整備手帳", location: "テンダーボックス", memo: "1" },
+            { name: "船検関連の書類", location: "テンダーボックス", memo: "" },
+            { name: "レスキュー艇管理マニュアル", location: "テンダーボックス", memo: "" },
+            { name: "ヤマハグリース", location: "テンダーボックス", memo: "" },
+            { name: "ベルトレンチ", location: "テンダーボックス", memo: "1" },
+            { name: "パンク修理キット", location: "テンダーボックス", memo: "2" },
+
+            // スプレーボックス
+            { name: "クリエイティブカラースプレーゴールド", location: "スプレーボックス", memo: "1" },
+            { name: "クリエイティブカラースプレーグリーン", location: "スプレーボックス", memo: "1" },
+            { name: "蛍光スプレー", location: "スプレーボックス", memo: "1" },
+            { name: "シリコンラッカースプレー", location: "スプレーボックス", memo: "1" },
+            { name: "セールコートスプレー", location: "スプレーボックス", memo: "1" },
+            { name: "マルチ密着プライマー", location: "スプレーボックス", memo: "1" },
+            { name: "ラッカーマーキングスプレー", location: "スプレーボックス", memo: "1" },
+            { name: "KURE3-36", location: "スプレーボックス", memo: "1" },
+            { name: "UVプロテクトワックス", location: "スプレーボックス", memo: "1" },
+            { name: "マリーンワンステップワックス", location: "スプレーボックス", memo: "1" },
+            { name: "超微粒子コンパウンド", location: "スプレーボックス", memo: "" },
+            { name: "絵の具（赤）", location: "スプレーボックス", memo: "1" },
+
+            // その他
+            { name: "アセトン", location: "その他", memo: "1" },
+            { name: "ポリエステル樹脂", location: "その他", memo: "1" },
+            { name: "FRP洗浄液", location: "その他", memo: "1" },
+            { name: "FRP修理用A剤", location: "その他", memo: "" },
+            { name: "シリコンコーク", location: "その他", memo: "1" },
+            { name: "シリコンガン", location: "その他", memo: "1" },
+            { name: "ショッピングバッグ", location: "その他", memo: "それなりに" },
+            { name: "ピンマーク", location: "その他", memo: "1" },
+            { name: "女子用品", location: "その他", memo: "1" },
+            { name: "クランプ", location: "その他", memo: "6" },
+            { name: "トルクレンチ", location: "その他", memo: "1" },
+            { name: "グラインダー", location: "その他", memo: "1" },
+            { name: "延長コード", location: "その他", memo: "1" },
+            { name: "ラダーヘット", location: "その他", memo: "1" },
+            { name: "ろうと", location: "その他", memo: "1" },
+            { name: "ガラス繊維", location: "その他", memo: "2袋" },
+            { name: "エフコテープ", location: "その他", memo: "" },
+            { name: "水道ホース", location: "その他", memo: "" },
+            { name: "リベット", location: "その他", memo: "いっぱい" },
+            { name: "モンキーレンチ", location: "その他", memo: "1" },
+            { name: "バイスプライヤー（錆び）", location: "その他", memo: "1" },
+            { name: "布団乾燥機", location: "その他", memo: "1" },
+            { name: "ノコギリ", location: "その他", memo: "2種類" },
+            { name: "切られたまな板", location: "その他", memo: "センターボード用？" },
+            { name: "バッテリー充電器", location: "その他", memo: "" },
+            { name: "はかり", location: "その他", memo: "2kgまで" },
+            { name: "ドライヤー", location: "その他", memo: "" }
+        ];
+
+        // ⚙️ 初回データ登録チェック
+        async function checkAndInitTools() {
+            try {
+                const toolsRef = collection(db, "tools");
+                const snapshot = await getDocs(toolsRef);
+                if (snapshot.empty) {
+                    for (const tool of initialTools) {
+                        await addDoc(toolsRef, tool);
+                    }
+                }
+            } catch (error) {
+                console.error("初期データ登録エラー:", error);
+            }
+        }
+
+        // 📱 備品データの読み込み表示
+        function loadTools() {
+            const toolsRef = collection(db, "tools");
+            onSnapshot(toolsRef, (snapshot) => {
+                const list = document.getElementById('tools-list');
+                if (!list) return;
+                list.innerHTML = '';
+
+                if (snapshot.empty) {
+                    list.innerHTML = '<p style="color:rgba(255,255,255,0.5); text-align:center;">備品データがありません。</p>';
+                    return;
+                }
+
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const div = document.createElement('div');
+                    div.className = 'post tool-item';
+                    div.innerHTML = `
+                        <div class="post-title">${data.name}</div>
+                        <div>
+                            <span class="badge badge-loc">📍 ${data.location || '未設定'}</span>
+                        </div>
+                        <p style="margin-top:8px; font-size:0.9rem; color:rgba(255,255,255,0.8);">📝 数量/メモ: ${data.memo || 'なし'}</p>
+                    `;
+                    list.appendChild(div);
+                });
+            });
+        }
+
+        // 🔍 備品検索
+        document.getElementById('tools-search')?.addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase().trim();
+            const items = document.querySelectorAll('#tools-list .tool-item');
+            items.forEach(item => {
+                const content = item.innerText.toLowerCase();
+                if (content.includes(keyword)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         });
-        html += '</ul>';
-        toolsList.innerHTML = html;
-      } catch (error) {
-        console.error("データ読み込みエラー:", error);
-        toolsList.innerHTML = "<p>データの読み込みに失敗しました。</p>";
-      }
-    }
 
-    // ダミー読み込み関数（既存のコードとの互換用）
-    function loadRecords() {}
-    function loadMaintenanceRecords() {}
-    function loadBbsPosts() {}
+        onAuthStateChanged(auth, async (user) => {
+            const loginScreen = document.getElementById('login-screen');
+            const appContainer = document.getElementById('app-container');
+            const nameSetupScreen = document.getElementById('name-setup-screen');
+            
+            if (user) {
+                currentUserUid = user.uid;
+                loginScreen.style.display = 'none';
 
-    // 🔐 ログイン状態の監視
-    onAuthStateChanged(auth, async (user) => {
-      const loginScreen = document.getElementById('login-screen');
-      const appContainer = document.getElementById('app-container');
-      const nameSetupScreen = document.getElementById('name-setup-screen');
+                try {
+                    const userDocRef = doc(db, "users", user.uid);
+                    const userDocSnap = await getDoc(userDocRef);
 
-      if (user) {
-        currentUserUid = user.uid;
-        loginScreen.style.display = 'none';
+                    if (userDocSnap.exists()) {
+                        currentUserName = userDocSnap.data().name;
+                        document.getElementById('welcome-msg').innerText = `${currentUserName} さん`;
+                        nameSetupScreen.style.display = 'none';
+                        appContainer.style.display = 'block';
+                        
+                        await checkAndInitTools();
+                        loadTools();
+                        loadRecords();
+                        loadMaintenanceRecords();
+                        loadBbsPosts();
+                    } else {
+                        appContainer.style.display = 'none';
+                        nameSetupScreen.style.display = 'flex';
+                    }
+                } catch (e) {
+                    console.error("ユーザー情報の取得エラー:", e);
+                }
+            } else {
+                loginScreen.style.display = 'flex';
+                appContainer.style.display = 'none';
+                nameSetupScreen.style.display = 'none';
+                document.getElementById('welcome-msg').innerText = "";
+            }
+        });
 
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
+        document.getElementById('btn-save-name').addEventListener('click', async () => {
+            const nameInput = document.getElementById('user-display-name').value.trim();
+            if (!nameInput) {
+                alert('名前を入力してください。');
+                return;
+            }
 
-        if (userDocSnap.exists()) {
-          currentUserName = userDocSnap.data().name;
-          document.getElementById('welcome-msg').innerText = `${currentUserName} さん`;
-          nameSetupScreen.style.display = 'none';
-          appContainer.style.display = 'block';
+            try {
+                await setDoc(doc(db, "users", currentUserUid), {
+                    name: nameInput,
+                    email: auth.currentUser.email
+                });
+                currentUserName = nameInput;
+                document.getElementById('welcome-msg').innerText = `${currentUserName} さん`;
+                document.getElementById('name-setup-screen').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                
+                await checkAndInitTools();
+                loadTools();
+                loadRecords();
+                loadMaintenanceRecords();
+                loadBbsPosts();
+                alert('👤 名前の登録が完了しました！');
+            } catch (e) {
+                console.error("名前の保存エラー: ", e);
+                alert('名前の保存に失敗しました。');
+            }
+        });
 
-          await checkAndInitTools();
-          loadTools();
-        } else {
-          appContainer.style.display = 'none';
-          nameSetupScreen.style.display = 'flex';
+        document.getElementById('btn-login').addEventListener('click', () => {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                alert('IDとパスワードを入力してください。');
+                return;
+            }
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => { alert('🎉 ログインに成功しました！'); })
+                .catch((error) => {
+                    console.error("ログインエラー:", error);
+                    alert('❌ ログインに失敗しました。IDとパスワードを確認してください。');
+                });
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth).then(() => { alert('🔓 ログアウトしました。'); });
+        });
+
+        const boatData = {
+            "470": ["4237", "4146", "4706", "4572", "陸待or整備"],
+            "スナイプ": ["31594", "31287", "31245", "31067", "28675", "30575", "陸待or整備"],
+            "レスキュー艇": ["ネプチューン", "パルパロ5", "牛若丸"]
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+            if(document.getElementById('sec-' + tabId)) document.getElementById('sec-' + tabId).classList.add('active');
+            if(document.getElementById('nav-' + tabId)) document.getElementById('nav-' + tabId).classList.add('active');
         }
-      } else {
-        loginScreen.style.display = 'flex';
-        appContainer.style.display = 'none';
-        nameSetupScreen.style.display = 'none';
-      }
-    });
 
-    // 🔘 イベント処理
-    document.getElementById('btn-save-name')?.addEventListener('click', async () => {
-      const nameInput = document.getElementById('user-display-name').value.trim();
-      if (!nameInput) return alert('名前を入力してください。');
+        document.getElementById('nav-weather').addEventListener('click', () => switchTab('weather'));
+        document.getElementById('nav-bbs').addEventListener('click', () => switchTab('bbs'));
+        document.getElementById('nav-maintenance').addEventListener('click', () => switchTab('maintenance'));
+        document.getElementById('nav-record').addEventListener('click', () => switchTab('record'));
+        document.getElementById('nav-tools').addEventListener('click', () => switchTab('tools'));
 
-      await setDoc(doc(db, "users", currentUserUid), { name: nameInput, email: auth.currentUser.email });
-      document.getElementById('name-setup-screen').style.display = 'none';
-      document.getElementById('app-container').style.display = 'block';
-      await checkAndInitTools();
-      loadTools();
-    });
+        function updateBoatOptions(classSelectId, boatSelectId) {
+            const classSelect = document.getElementById(classSelectId);
+            const boatSelect = document.getElementById(boatSelectId);
+            const selectedClass = classSelect.value;
 
-    document.getElementById('btn-login')?.addEventListener('click', () => {
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
-      if (email && password) signInWithEmailAndPassword(auth, email, password);
-    });
+            boatSelect.innerHTML = '';
 
-    document.getElementById('btn-logout')?.addEventListener('click', () => signOut(auth));
+            if (selectedClass && boatData[selectedClass]) {
+                boatSelect.disabled = false;
+                boatData[selectedClass].forEach(boat => {
+                    const opt = document.createElement('option');
+                    opt.value = boat;
+                    opt.textContent = boat;
+                    boatSelect.appendChild(opt);
+                });
+            } else {
+                boatSelect.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "-- 先にクラスを選択してください --";
+                boatSelect.appendChild(opt);
+            }
+        }
 
-    // 👆 タブ切り替え処理
-    function switchTab(tabId) {
-      document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
-      document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
-      document.getElementById('sec-' + tabId)?.classList.add('active');
-      document.getElementById('nav-' + tabId)?.classList.add('active');
-    }
+        document.getElementById('maint-class').addEventListener('change', () => updateBoatOptions('maint-class', 'maint-boat'));
+        document.getElementById('record-class').addEventListener('change', () => updateBoatOptions('record-class', 'record-boat'));
 
-    document.getElementById('nav-record')?.addEventListener('click', () => switchTab('record'));
-    document.getElementById('nav-maintenance')?.addEventListener('click', () => switchTab('maintenance'));
-    document.getElementById('nav-bbs')?.addEventListener('click', () => switchTab('bbs'));
-    document.getElementById('nav-weather')?.addEventListener('click', () => switchTab('weather'));
-    document.getElementById('nav-tools')?.addEventListener('click', () => switchTab('tools'));
-  </script>
-</body>
-</html>
+        // 🔍 掲示板検索
+        document.getElementById('bbs-search').addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase().trim();
+            const posts = document.querySelectorAll('#bbs-list .post');
+            posts.forEach(post => {
+                const title = post.querySelector('.post-title')?.innerText.toLowerCase() || "";
+                const content = post.innerText.toLowerCase();
+                if (title.includes(keyword) || content.includes(keyword)) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+        });
+
+        // 📋 掲示板投稿
+        document.getElementById('btn-bbs-submit').addEventListener('click', async () => {
+            const title = document.getElementById('bbs-title').value.trim();
+            const priority = document.getElementById('bbs-priority').value;
+            const date = document.getElementById('bbs-date').value;
+            const text = document.getElementById('bbs-input').value.trim();
+
+            if (!title || !text) {
+                alert('題名と本文を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "bbs"), {
+                    title, priority, date, text,
+                    userName: currentUserName,
+                    createdAt: new Date()
+                });
+                document.getElementById('bbs-title').value = '';
+                document.getElementById('bbs-date').value = '';
+                document.getElementById('bbs-input').value = '';
+                alert('📋 掲示板に投稿しました！');
+            } catch (e) {
+                console.error("掲示板投稿エラー:", e);
+                alert('投稿に失敗しました。');
+            }
+        });
+
+        function loadBbsPosts() {
+            const q = query(collection(db, "bbs"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('bbs-list');
+                const alertList = document.getElementById('alert-list');
+                const alertArea = document.getElementById('weather-bbs-alerts');
+                
+                if (!list) return;
+                list.innerHTML = '';
+                if (alertList) alertList.innerHTML = '';
+
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0]; 
+                
+                const threeDaysLater = new Date();
+                threeDaysLater.setDate(now.getDate() + 3);
+                const threeDaysLaterStr = threeDaysLater.toISOString().split('T')[0];
+
+                let hasAlerts = false;
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    const div = document.createElement('div');
+                    div.className = `post ${data.priority === 'high' ? 'priority-high' : ''}`;
+                    
+                    let badges = `<span class="badge ${data.priority === 'high' ? 'badge-high' : 'badge-normal'}">${data.priority === 'high' ? '🚨 重要' : '💬 通常'}</span>`;
+                    if (data.date) badges += `<span class="badge badge-date">📅 ${data.date}</span>`;
+                    badges += `<span class="badge badge-user">👤 ${data.userName || '部員'}</span>`;
+
+                    const dateText = data.date ? `<span style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-left: 10px;">(${data.date})</span>` : '';
+                    
+                    div.innerHTML = `
+                        <div class="post-title">${data.title}${dateText}</div>
+                        <div>${badges}</div>
+                        <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
+                    `;
+                    list.appendChild(div);
+
+                    if (data.date && alertList) {
+                        if (data.date >= todayStr && data.date <= threeDaysLaterStr) {
+                            hasAlerts = true;
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = `post ${data.priority === 'high' ? 'priority-high' : ''}`;
+                            alertDiv.innerHTML = `
+                                <div class="post-title" style="font-size: 0.95rem;">${data.title} <span style="color:#ffa502;">(期日: ${data.date})</span></div>
+                                <p style="white-space:pre-wrap; margin-top:5px; font-size:0.85rem; color:rgba(255,255,255,0.8);">${data.text}</p>
+                            `;
+                            alertList.appendChild(alertDiv);
+                        }
+                    }
+                });
+
+                if (alertArea) {
+                    alertArea.style.display = hasAlerts ? 'block' : 'none';
+                }
+            });
+        }
+
+        // 🛠️ ヨット管理
+        document.getElementById('btn-maint-submit').addEventListener('click', async () => {
+            const date = document.getElementById('maint-date').value;
+            const className = document.getElementById('maint-class').value;
+            const boat = document.getElementById('maint-boat').value;
+            const text = document.getElementById('maint-text').value.trim();
+
+            if (!date || !className || !boat || !text) {
+                alert('すべての項目を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "maintenance"), {
+                    date, className, boat, text,
+                    userName: currentUserName,
+                    createdAt: new Date()
+                });
+                
+                fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        'type': 'maintenance',
+                        'date': date,
+                        'class': className,
+                        'boat': boat,
+                        'text': text,
+                        'user': currentUserName
+                    })
+                }).catch(e => console.error("GAS送信エラー:", e));
+
+                document.getElementById('maint-text').value = '';
+                alert('🛠️ 管理記録を保存しました！');
+            } catch (e) {
+                console.error("整備記録保存エラー:", e);
+                alert('保存に失敗しました。');
+            }
+        });
+
+        let allMaintRecords = [];
+        function loadMaintenanceRecords() {
+            const q = query(collection(db, "maintenance"), orderBy("date", "desc"));
+            onSnapshot(q, (snapshot) => {
+                allMaintRecords = [];
+                snapshot.forEach(doc => {
+                    allMaintRecords.push(doc.data());
+                });
+                applyMaintenanceFilter();
+            });
+        }
+
+        function applyMaintenanceFilter() {
+            const filterValue = document.getElementById('filter-boat').value;
+            const list = document.getElementById('maint-list');
+            if(!list) return;
+            list.innerHTML = '';
+
+            const filtered = allMaintRecords.filter(rec => filterValue === 'all' || rec.boat === filterValue);
+
+            if(filtered.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.5); text-align:center;">記録がありません。</p>';
+                return;
+            }
+
+            filtered.forEach(data => {
+                const div = document.createElement('div');
+                div.className = 'post';
+                div.innerHTML = `
+                    <div class="post-title">［${data.date}］${data.className} - ${data.boat}</div>
+                    <div><span class="badge badge-user">👤 記録者: ${data.userName || '不明'}</span></div>
+                    <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('filter-boat').addEventListener('change', applyMaintenanceFilter);
+
+        // 📝 練習記録
+        document.getElementById('btn-record-submit').addEventListener('click', async () => {
+            const date = document.getElementById('record-date').value;
+            const className = document.getElementById('record-class').value;
+            const boat = document.getElementById('record-boat').value;
+            const text = document.getElementById('record-text').value.trim();
+
+            if (!date || !className || !boat || !text) {
+                alert('すべての項目を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "records"), {
+                    date, className, boat, text,
+                    userName: currentUserName,
+                    createdAt: new Date()
+                });
+
+                fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        'type': 'record',
+                        'date': date,
+                        'class': className,
+                        'boat': boat,
+                        'text': text,
+                        'user': currentUserName
+                    })
+                }).catch(e => console.error("GAS送信エラー:", e));
+
+                document.getElementById('record-text').value = '';
+                alert('📝 練習記録を保存しました！');
+            } catch (e) {
+                console.error("練習記録保存エラー:", e);
+                alert('保存に失敗しました。');
+            }
+        });
+
+        function loadRecords() {
+            const q = query(collection(db, "records"), orderBy("date", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('record-list');
+                if(!list) return;
+                list.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'post';
+                    div.innerHTML = `
+                        <div class="post-title">［${data.date}］${data.className} - ${data.boat}</div>
+                        <div><span class="badge badge-user">👤 記録者: ${data.userName || '不明'}</span></div>
+                        <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
+                    `;
+                    list.appendChild(div);
+                });
+            });
+        }
+    </script></body></html>
