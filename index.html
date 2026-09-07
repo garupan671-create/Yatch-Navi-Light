@@ -11,6 +11,8 @@
             --accent-color: #4ea8de;
             --btn-bg: #5bc0be;
             --danger-color: #ff4757;
+            --chat-my-msg: #3a86ff;
+            --chat-other-msg: #2b2d42;
         }
         body {
             font-family: Arial, sans-serif;
@@ -130,7 +132,6 @@
         .badge-user { background-color: #a855f7; color: white; }
         .badge-loc { background-color: #2ed573; color: black; }
         .badge-cat { background-color: #eccc68; color: black; }
-        .badge-time { background-color: rgba(255,255,255,0.15); color: #ddd; }
 
         .group-header {
             font-size: 1.1rem;
@@ -157,6 +158,79 @@
             margin-bottom: 15px;
             border: 1px dashed var(--accent-color);
         }
+
+        /* 💬 チャット用スタイル */
+        .chat-room-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .chat-room-btn {
+            flex: 1;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--accent-color);
+            color: var(--text-color);
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .chat-room-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        .chat-messages {
+            height: 350px;
+            overflow-y: auto;
+            background-color: rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chat-bubble-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+        .chat-bubble-container.my-msg {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+        .chat-bubble-container.other-msg {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+        .chat-user-name {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 3px;
+        }
+        .chat-bubble {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        .my-msg .chat-bubble {
+            background-color: var(--chat-my-msg);
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+        .other-msg .chat-bubble {
+            background-color: var(--chat-other-msg);
+            color: white;
+            border-bottom-left-radius: 2px;
+        }
+        .chat-time {
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 3px;
+        }
+
         .live-btn {
             display: block;
             text-align: center;
@@ -250,6 +324,7 @@
         <nav>
             <button id="nav-weather" class="active">☀️ 天気予報</button>
             <button id="nav-bbs">📋 掲示板</button>
+            <button id="nav-chat">💬 チームチャット</button>
             <button id="nav-record">📝 練習記録</button>
             <button id="nav-maintenance">🛠️ ヨット管理</button>
             <button id="nav-tools">📦 備品管理</button>
@@ -309,6 +384,22 @@
             </div>
             
             <div id="bbs-list" style="margin-top: 20px;"></div>
+        </div>
+
+        <div id="sec-chat" class="content-section">
+            <h3>💬 チームチャット</h3>
+            
+            <div class="chat-room-selector">
+                <button class="chat-room-btn active" id="btn-room-470">⛵ 470級</button>
+                <button class="chat-room-btn" id="btn-room-snipe">⛵ スナイプ級</button>
+            </div>
+
+            <div class="chat-messages" id="chat-messages-container"></div>
+
+            <div style="margin-top: 10px;">
+                <textarea id="chat-input-text" placeholder="メッセージを入力..." rows="2" style="resize: none;"></textarea>
+                <button class="submit-btn" id="btn-send-chat" style="margin-top: 8px;">送信する 🚀</button>
+            </div>
         </div>
 
         <div id="sec-record" class="content-section">
@@ -457,10 +548,12 @@
 
         let currentUserName = "未設定部員";
         let currentUserUid = "";
+        let currentChatRoom = "470";
+        let chatUnsubscribe = null;
 
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyP8-MWJyATLOuhDT79pJZftV0agLCw6cgOaRLzmzK35Aogcti5uI4X2KEx84tMKuBG/exec";
 
-        // ⏱️ 日時フォーマット関数（月/日 時:分）
+        // ⏱️ 日時フォーマット関数
         function formatDateTime(dateObj) {
             if (!dateObj) return "";
             const d = dateObj.toDate ? dateObj.toDate() : new Date(dateObj);
@@ -471,7 +564,7 @@
             return `${month}/${day} ${hours}:${minutes}`;
         }
 
-        // 📋 備品初期データリスト
+        // 📦 備品初期データ
         const initialTools = [
             { name: "テンションゲージ", location: "計測用", category: "📏 計測・文房具", memo: "5" },
             { name: "メジャー", location: "計測用", category: "📏 計測・文房具", memo: "2" },
@@ -570,13 +663,11 @@
         document.getElementById('tools-group-by')?.addEventListener('change', renderTools);
         document.getElementById('tools-search')?.addEventListener('input', renderTools);
 
-        // ➕ フォーム開閉
         document.getElementById('btn-toggle-add-tool')?.addEventListener('click', () => {
             const form = document.getElementById('add-tool-form');
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
         });
 
-        // 💾 新しい備品の保存
         document.getElementById('btn-save-tool')?.addEventListener('click', async () => {
             const name = document.getElementById('new-tool-name').value.trim();
             const location = document.getElementById('new-tool-location').value;
@@ -600,6 +691,69 @@
             } catch (e) {
                 console.error("備品追加エラー:", e);
                 alert('備品の追加に失敗しました。');
+            }
+        });
+
+        // 💬 チャット処理
+        function switchChatRoom(roomName) {
+            currentChatRoom = roomName;
+            document.getElementById('btn-room-470').classList.toggle('active', roomName === '470');
+            document.getElementById('btn-room-snipe').classList.toggle('active', roomName === 'snipe');
+            loadChatMessages();
+        }
+
+        document.getElementById('btn-room-470')?.addEventListener('click', () => switchChatRoom('470'));
+        document.getElementById('btn-room-snipe')?.addEventListener('click', () => switchChatRoom('snipe'));
+
+        function loadChatMessages() {
+            if (chatUnsubscribe) chatUnsubscribe();
+
+            const chatRef = collection(db, `chats_${currentChatRoom}`);
+            const q = query(chatRef, orderBy("createdAt", "asc"));
+
+            chatUnsubscribe = onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('chat-messages-container');
+                if (!container) return;
+                container.innerHTML = '';
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const isMyMsg = data.uid === currentUserUid;
+
+                    const msgContainer = document.createElement('div');
+                    msgContainer.className = `chat-bubble-container ${isMyMsg ? 'my-msg' : 'other-msg'}`;
+
+                    const timeStr = formatDateTime(data.createdAt);
+
+                    msgContainer.innerHTML = `
+                        <div class="chat-user-name">${data.userName || '部員'}</div>
+                        <div class="chat-bubble">${data.text}</div>
+                        <div class="chat-time">${timeStr}</div>
+                    `;
+                    container.appendChild(msgContainer);
+                });
+
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        document.getElementById('btn-send-chat')?.addEventListener('click', async () => {
+            const input = document.getElementById('chat-input-text');
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            try {
+                await addDoc(collection(db, `chats_${currentChatRoom}`), {
+                    text,
+                    userName: currentUserName,
+                    uid: currentUserUid,
+                    createdAt: new Date()
+                });
+                input.value = '';
+            } catch (e) {
+                console.error("チャット送信エラー:", e);
+                alert('メッセージの送信に失敗しました。');
             }
         });
 
@@ -627,6 +781,7 @@
                         loadRecords();
                         loadMaintenanceRecords();
                         loadBbsPosts();
+                        loadChatMessages();
                     } else {
                         appContainer.style.display = 'none';
                         nameSetupScreen.style.display = 'flex';
@@ -664,6 +819,7 @@
                 loadRecords();
                 loadMaintenanceRecords();
                 loadBbsPosts();
+                loadChatMessages();
                 alert('👤 名前の登録が完了しました！');
             } catch (e) {
                 console.error("名前の保存エラー: ", e);
@@ -707,6 +863,7 @@
 
         document.getElementById('nav-weather').addEventListener('click', () => switchTab('weather'));
         document.getElementById('nav-bbs').addEventListener('click', () => switchTab('bbs'));
+        document.getElementById('nav-chat').addEventListener('click', () => switchTab('chat'));
         document.getElementById('nav-maintenance').addEventListener('click', () => switchTab('maintenance'));
         document.getElementById('nav-record').addEventListener('click', () => switchTab('record'));
         document.getElementById('nav-tools').addEventListener('click', () => switchTab('tools'));
@@ -738,7 +895,7 @@
         document.getElementById('maint-class').addEventListener('change', () => updateBoatOptions('maint-class', 'maint-boat'));
         document.getElementById('record-class').addEventListener('change', () => updateBoatOptions('record-class', 'record-boat'));
 
-        // 🔍 掲示板検索
+        // 📋 掲示板投稿・読み込み
         document.getElementById('bbs-search').addEventListener('input', (e) => {
             const keyword = e.target.value.toLowerCase().trim();
             const posts = document.querySelectorAll('#bbs-list .post');
@@ -753,7 +910,6 @@
             });
         });
 
-        // 📋 掲示板投稿
         document.getElementById('btn-bbs-submit').addEventListener('click', async () => {
             const title = document.getElementById('bbs-title').value.trim();
             const priority = document.getElementById('bbs-priority').value;
@@ -808,14 +964,15 @@
                     div.className = `post ${data.priority === 'high' ? 'priority-high' : ''}`;
                     
                     let badges = `<span class="badge ${data.priority === 'high' ? 'badge-high' : 'badge-normal'}">${data.priority === 'high' ? '🚨 重要' : '💬 通常'}</span>`;
-                    if (data.date) badges += `<span class="badge badge-date">📅 ${data.date}</span>`;
+                    if (data.date) badges += `<span class="badge badge-date">📅 予定日: ${data.date}</span>`;
                     badges += `<span class="badge badge-user">👤 ${data.userName || '部員'}</span>`;
-                    if (data.createdAt) badges += `<span class="badge badge-time">🕒 ${formatDateTime(data.createdAt)}</span>`;
 
-                    const dateText = data.date ? `<span style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-left: 10px;">(${data.date})</span>` : '';
+                    const postTimeText = data.createdAt 
+                        ? `<span style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-left: 10px;">(投稿: ${formatDateTime(data.createdAt)})</span>` 
+                        : '';
                     
                     div.innerHTML = `
-                        <div class="post-title">${data.title}${dateText}</div>
+                        <div class="post-title">${data.title}${postTimeText}</div>
                         <div>${badges}</div>
                         <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
                     `;
@@ -908,10 +1065,10 @@
             filtered.forEach(data => {
                 const div = document.createElement('div');
                 div.className = 'post';
-                let timeBadge = data.createdAt ? `<span class="badge badge-time">🕒 ${formatDateTime(data.createdAt)}</span>` : '';
+                let timeText = data.createdAt ? `<span style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin-left:8px;">(${formatDateTime(data.createdAt)})</span>` : '';
                 div.innerHTML = `
-                    <div class="post-title">［${data.date}］${data.className} - ${data.boat}</div>
-                    <div><span class="badge badge-user">👤 記録者: ${data.userName || '不明'}</span>${timeBadge}</div>
+                    <div class="post-title">［${data.date}］${data.className} - ${data.boat}${timeText}</div>
+                    <div><span class="badge badge-user">👤 記録者: ${data.userName || '不明'}</span></div>
                     <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
                 `;
                 list.appendChild(div);
@@ -969,10 +1126,10 @@
                     const data = doc.data();
                     const div = document.createElement('div');
                     div.className = 'post';
-                    let timeBadge = data.createdAt ? `<span class="badge badge-time">🕒 ${formatDateTime(data.createdAt)}</span>` : '';
+                    let timeText = data.createdAt ? `<span style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin-left:8px;">(${formatDateTime(data.createdAt)})</span>` : '';
                     div.innerHTML = `
-                        <div class="post-title">［${data.date}］${data.className} - ${data.boat}</div>
-                        <div><span class="badge badge-user">👤 記録者: ${data.userName || '不明'}</span>${timeBadge}</div>
+                        <div class="post-title">［${data.date}］${data.className} - ${data.boat}${timeText}</div>
+                        <div><span class="badge badge-user">👤 記録者: ${data.userName || '不明'}</span></div>
                         <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
                     `;
                     list.appendChild(div);
