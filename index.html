@@ -764,6 +764,17 @@
             
             if (user) {
                 currentUserUid = user.uid;
+                if ('Notification' in window) {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission().then((permission) => {
+                    if (permission === 'granted') {
+                        console.log('🔔 通知が許可されました！');
+                    } else if (permission === 'denied') {
+                        console.log('❌ 通知が拒否されました');
+                    }
+                });
+            }
+        }                
                 loginScreen.style.display = 'none';
 
                 try {
