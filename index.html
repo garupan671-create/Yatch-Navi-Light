@@ -745,34 +745,39 @@
             });
         }
 
-        function renderMessage(id, data, container) {
-            const isMyMsg = data.uid === currentUserUid;
-            const timeStr = formatDateTime(data.createdAt);
-            const readByList = data.readBy || [];
-            
-            // 👁️ 既読数の計算（表示）
-            const readCount = readByList.length;
-            const readText = readCount > 0 ? `<span class="read-count">既読 ${readCount}</span>` : '';
+ function renderMessage(id, data, container) {
+    const isMyMsg = data.uid === currentUserUid;
+    const timeStr = formatDateTime(data.createdAt);
+    const readByList = data.readBy || [];
+    
+    // 👁️ 自分以外の読んだ人数を計算（自分をカウントから除く）
+    // 送信時に自分が readBy に入っているため、-1 します
+    const otherReadCount = Math.max(0, readByList.length - 1);
 
-            let msgContainer = document.getElementById(`msg-${id}`);
+    // 自分のメッセージ かつ 1人以上が読んでいる場合のみ「既読 N」を表示
+    let readText = '';
+    if (isMyMsg && otherReadCount > 0) {
+        readText = `<span class="read-count">既読 ${otherReadCount}</span>`;
+    }
 
-            if (!msgContainer) {
-                msgContainer = document.createElement('div');
-                msgContainer.id = `msg-${id}`;
-                msgContainer.className = `chat-bubble-container ${isMyMsg ? 'my-msg' : 'other-msg'}`;
-                container.appendChild(msgContainer);
-            }
+    let msgContainer = document.getElementById(`msg-${id}`);
 
-            msgContainer.innerHTML = `
-                <div class="chat-user-name">${data.userName || '部員'}</div>
-                <div class="chat-bubble">${data.text}</div>
-                <div class="chat-info-line">
-                    ${readText}
-                    <span class="chat-time">${timeStr}</span>
-                </div>
-            `;
-        }
+    if (!msgContainer) {
+        msgContainer = document.createElement('div');
+        msgContainer.id = `msg-${id}`;
+        msgContainer.className = `chat-bubble-container ${isMyMsg ? 'my-msg' : 'other-msg'}`;
+        container.appendChild(msgContainer);
+    }
 
+    msgContainer.innerHTML = `
+        <div class="chat-user-name">${data.userName || '部員'}</div>
+        <div class="chat-bubble">${data.text}</div>
+        <div class="chat-info-line">
+            ${readText}
+            <span class="chat-time">${timeStr}</span>
+        </div>
+    `;
+}
         document.getElementById('btn-send-chat')?.addEventListener('click', async () => {
             const input = document.getElementById('chat-input-text');
             const text = input.value.trim();
