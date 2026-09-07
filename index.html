@@ -382,8 +382,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc,getDocs,query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
         const firebaseConfig = {
             apiKey: "AIzaSyCQ0eCrYy3xYLAis0b3g4FqqOaKeYRYJf8",
             authDomain: "yacht-navi-app.firebaseapp.com",
@@ -399,6 +398,120 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        const initialTools = [
+    // 📐 計測用
+    { name: "テンションゲージ", location: "計測用", memo: "5" },
+    { name: "メジャー", location: "計測用", memo: "2" },
+    { name: "銀テ", location: "計測用", memo: "1" },
+    { name: "セールの切れ端", location: "計測用", memo: "1" },
+    { name: "直角定規", location: "計測用", memo: "2" },
+    { name: "ライター", location: "計測用", memo: "5" },
+    { name: "タイラップ", location: "計測用", memo: "たくさん" },
+    { name: "ハケ", location: "計測用", memo: "1" },
+    { name: "風見", location: "計測用", memo: "たくさん" },
+    { name: "マーカー", location: "計測用", memo: "3 (黒:2, 赤:1)" },
+
+    // 🧰 工具用
+    { name: "バスコーク", location: "工具用", memo: "5" },
+    { name: "マーロウ", location: "工具用", memo: "1" },
+    { name: "養生テープ", location: "工具用", memo: "2" },
+    { name: "透明テープ", location: "工具用", memo: "1" },
+    { name: "ランチャー問題対処チェーン", location: "工具用", memo: "2" },
+    { name: "マイナスドライバー", location: "工具用", memo: "3" },
+    { name: "プラスドライバー", location: "工具用", memo: "7" },
+    { name: "キリ", location: "工具用", memo: "1" },
+    { name: "レンチ", location: "工具用", memo: "青セット1個と9本" },
+    { name: "六角レンチ", location: "工具用", memo: "1セット" },
+    { name: "ハンマー", location: "工具用", memo: "1" },
+    { name: "ハトメ用の何か", location: "工具用", memo: "2" },
+    { name: "ハトメ", location: "工具用", memo: "たくさん" },
+    { name: "ポンチ", location: "工具用", memo: "1" },
+    { name: "工具3個セット", location: "工具用", memo: "1" },
+    { name: "ハサミ", location: "工具用", memo: "1" },
+    { name: "カーボン剥がし用ベラ", location: "工具用", memo: "1" },
+    { name: "バイス", location: "工具用", memo: "1" },
+    { name: "接着剤", location: "工具用", memo: "1" },
+    { name: "ワイヤーカッター", location: "工具用", memo: "1" },
+
+    // 🛥️ テンダーボックス
+    { name: "マイナスドライバー", location: "テンダーボックス", memo: "3" },
+    { name: "ギアオイル", location: "テンダーボックス", memo: "2" },
+    { name: "ドレンプラグガスケット", location: "テンダーボックス", memo: "いっぱい" },
+    { name: "エアフィルター", location: "テンダーボックス", memo: "1" },
+    { name: "グリースニップル", location: "テンダーボックス", memo: "ひと袋" },
+    { name: "グリースを充填するやつ（中身あり）", location: "テンダーボックス", memo: "1" },
+    { name: "結束バンド", location: "テンダーボックス", memo: "ひと袋" },
+    { name: "Y字レンチ", location: "テンダーボックス", memo: "1" },
+    { name: "プライヤー", location: "テンダーボックス", memo: "1 (錆びた)" },
+    { name: "船外機整備手帳", location: "テンダーボックス", memo: "1" },
+    { name: "船検関連の書類", location: "テンダーボックス", memo: "" },
+    { name: "レスキュー艇管理マニュアル", location: "テンダーボックス", memo: "" },
+    { name: "ヤマハグリース", location: "テンダーボックス", memo: "" },
+    { name: "ベルトレンチ", location: "テンダーボックス", memo: "1" },
+    { name: "パンク修理キット", location: "テンダーボックス", memo: "2" },
+
+    // 🎨 スプレーボックス
+    { name: "クリエイティブカラースプレーゴールド", location: "スプレーボックス", memo: "1" },
+    { name: "クリエイティブカラースプレーグリーン", location: "スプレーボックス", memo: "1" },
+    { name: "蛍光スプレー", location: "スプレーボックス", memo: "1" },
+    { name: "シリコンラッカースプレー", location: "スプレーボックス", memo: "1" },
+    { name: "セールコートスプレー", location: "スプレーボックス", memo: "1" },
+    { name: "マルチ密着プライマー", location: "スプレーボックス", memo: "1" },
+    { name: "ラッカーマーキングスプレー", location: "スプレーボックス", memo: "1" },
+    { name: "KURE3-36", location: "スプレーボックス", memo: "1" },
+    { name: "UVプロテクトワックス", location: "スプレーボックス", memo: "1" },
+    { name: "マリーンワンステップワックス", location: "スプレーボックス", memo: "1" },
+    { name: "超微粒子コンパウンド", location: "スプレーボックス", memo: "" },
+    { name: "絵の具（赤）", location: "スプレーボックス", memo: "1" },
+
+    // 📦 その他
+    { name: "アセトン", location: "その他", memo: "1" },
+    { name: "ポリエステル樹脂", location: "その他", memo: "1" },
+    { name: "FRP洗浄液", location: "その他", memo: "1" },
+    { name: "FRP修理用A剤", location: "その他", memo: "" },
+    { name: "シリコンコーク", location: "その他", memo: "1" },
+    { name: "シリコンガン", location: "その他", memo: "1" },
+    { name: "ショッピングバッグ", location: "その他", memo: "それなりに" },
+    { name: "ピンマーク", location: "その他", memo: "1" },
+    { name: "女子用品", location: "その他", memo: "1" },
+    { name: "クランプ", location: "その他", memo: "6" },
+    { name: "トルクレンチ", location: "その他", memo: "1" },
+    { name: "グラインダー", location: "その他", memo: "1" },
+    { name: "延長コード", location: "その他", memo: "1" },
+    { name: "ラダーヘット", location: "その他", memo: "1" },
+    { name: "ろうと", location: "その他", memo: "1" },
+    { name: "ガラス繊維", location: "その他", memo: "2袋" },
+    { name: "エフコテープ", location: "その他", memo: "" },
+    { name: "水道ホース", location: "その他", memo: "" },
+    { name: "リベット", location: "その他", memo: "いっぱい" },
+    { name: "モンキーレンチ", location: "その他", memo: "1" },
+    { name: "バイスプライヤー", location: "その他", memo: "1 (錆び)" },
+    { name: "布団乾燥機", location: "その他", memo: "1" },
+    { name: "ノコギリ", location: "その他", memo: "2種類" },
+    { name: "切られたまな板", location: "その他", memo: "センターボード用？" },
+    { name: "バッテリー充電器", location: "その他", memo: "" },
+    { name: "はかり", location: "その他", memo: "2kgまで" },
+    { name: "ドライヤー", location: "その他", memo: "" },
+    { name: "その他写真撮ったもの", location: "その他", memo: "" }
+  ];
+
+  // 4. 初回自動登録を行う関数 ⚙️
+  async function checkAndInitTools() {
+    try {
+      const toolsRef = collection(db, "tools");
+      const snapshot = await getDocs(toolsRef);
+
+      if (snapshot.empty) {
+        console.log("初期データを登録中...");
+        for (const tool of initialTools) {
+          await addDoc(toolsRef, tool);
+        }
+        console.log("初期データの登録が完了しました！");
+      }
+    } catch (error) {
+      console.error("初期データの自動登録エラー:", error);
+    }
+  }
         let currentUserName = "未設定部員";
         let currentUserUid = "";
 
@@ -457,6 +570,7 @@
                 loadRecords();
                 loadMaintenanceRecords();
                 loadBbsPosts();
+                checkAndInitTools();
                 alert('👤 名前の登録が完了しました！');
             } catch (e) {
                 console.error("Error saving name: ", e);
