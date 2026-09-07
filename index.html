@@ -337,14 +337,14 @@
         </nav>
 
         <div id="sec-weather" class="content-section active">
-            <h3>☀️ 江の島 天気・風速</h3>
+            <h3>☀️ 天気・風速</h3>
             <p>最新の気象データや海の状況を確認しましょう。</p>
             
             <div class="windguru-container">
-                <script id="wg_fwdg_167452_100_1781852440051">
+                <script id="wg_fwdg_208567_100_1788794082857">
                 (function (window, document) {
                   var loader = function () {
-                    var arg = ["s=167452" ,"m=100","uid=wg_fwdg_167452_100_1781852440051" ,"wj=knots" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=240" ,"hrsm=2" ,"vt=forecasts" ,"lng=en" ,"idbs=1" ,"p=WINDSPD,GUST,SMER,TMPE,FLHGT,CDC,APCP1s,RATING"];
+                    var arg = ["s=208567" ,"m=100","uid=wg_fwdg_208567_100_1788794082857" ,"wj=ms" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=240" ,"hrsm=1" ,"vt=forecasts" ,"lng=en" ,"idbs=1" ,"p=WINDSPD,GUST,SMER,TMP"];
                     var script = document.createElement("script");
                     var tag = document.getElementsByTagName("script")[0];
                     script.src = "https://www.windguru.cz/js/widget.php?"+(arg.join("&"));
@@ -745,39 +745,39 @@
             });
         }
 
- function renderMessage(id, data, container) {
-    const isMyMsg = data.uid === currentUserUid;
-    const timeStr = formatDateTime(data.createdAt);
-    const readByList = data.readBy || [];
-    
-    // 👁️ 自分以外の読んだ人数を計算（自分をカウントから除く）
-    // 送信時に自分が readBy に入っているため、-1 します
-    const otherReadCount = Math.max(0, readByList.length - 1);
+        function renderMessage(id, data, container) {
+            const isMyMsg = data.uid === currentUserUid;
+            const timeStr = formatDateTime(data.createdAt);
+            const readByList = data.readBy || [];
+            
+            // 👁️ 自分以外の読んだ人数を計算（自分をカウントから除く）
+            const otherReadCount = Math.max(0, readByList.length - 1);
 
-    // 自分のメッセージ かつ 1人以上が読んでいる場合のみ「既読 N」を表示
-    let readText = '';
-    if (isMyMsg && otherReadCount > 0) {
-        readText = `<span class="read-count">既読 ${otherReadCount}</span>`;
-    }
+            // 自分のメッセージ かつ 1人以上が読んでいる場合のみ「既読 N」を表示
+            let readText = '';
+            if (isMyMsg && otherReadCount > 0) {
+                readText = `<span class="read-count">既読 ${otherReadCount}</span>`;
+            }
 
-    let msgContainer = document.getElementById(`msg-${id}`);
+            let msgContainer = document.getElementById(`msg-${id}`);
 
-    if (!msgContainer) {
-        msgContainer = document.createElement('div');
-        msgContainer.id = `msg-${id}`;
-        msgContainer.className = `chat-bubble-container ${isMyMsg ? 'my-msg' : 'other-msg'}`;
-        container.appendChild(msgContainer);
-    }
+            if (!msgContainer) {
+                msgContainer = document.createElement('div');
+                msgContainer.id = `msg-${id}`;
+                msgContainer.className = `chat-bubble-container ${isMyMsg ? 'my-msg' : 'other-msg'}`;
+                container.appendChild(msgContainer);
+            }
 
-    msgContainer.innerHTML = `
-        <div class="chat-user-name">${data.userName || '部員'}</div>
-        <div class="chat-bubble">${data.text}</div>
-        <div class="chat-info-line">
-            ${readText}
-            <span class="chat-time">${timeStr}</span>
-        </div>
-    `;
-}
+            msgContainer.innerHTML = `
+                <div class="chat-user-name">${data.userName || '部員'}</div>
+                <div class="chat-bubble">${data.text}</div>
+                <div class="chat-info-line">
+                    ${readText}
+                    <span class="chat-time">${timeStr}</span>
+                </div>
+            `;
+        }
+
         document.getElementById('btn-send-chat')?.addEventListener('click', async () => {
             const input = document.getElementById('chat-input-text');
             const text = input.value.trim();
@@ -863,7 +863,6 @@
             });
         });
 
-        // 練習記録の取得関数例（既存処理の維持用）
         function loadRecords() {
             const q = query(collection(db, "records"), orderBy("date", "desc"));
             onSnapshot(q, (snapshot) => {
