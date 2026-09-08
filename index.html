@@ -572,6 +572,95 @@
             return `${month}/${day} ${hours}:${minutes}`;
         }
 
+        // 📋 掲示板機能
+        document.getElementById('btn-bbs-submit')?.addEventListener('click', async () => {
+            const title = document.getElementById('bbs-title').value.trim();
+            const priority = document.getElementById('bbs-priority').value;
+            const date = document.getElementById('bbs-date').value;
+            const text = document.getElementById('bbs-input').value.trim();
+
+            if (!title || !text) {
+                alert('題名と本文を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "bbs"), {
+                    title,
+                    priority,
+                    date,
+                    text,
+                    userName: currentUserName,
+                    uid: currentUserUid,
+                    createdAt: new Date()
+                });
+
+                document.getElementById('bbs-title').value = '';
+                document.getElementById('bbs-date').value = '';
+                document.getElementById('bbs-input').value = '';
+
+                alert('📋 掲示板に投稿しました！');
+            } catch (e) {
+                console.error("掲示板投稿エラー:", e);
+                alert('投稿に失敗しました。');
+            }
+        });
+
+        let allBbsPosts = [];
+        function loadBBS() {
+            const q = query(collection(db, "bbs"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                allBbsPosts = [];
+                snapshot.forEach((docSnap) => {
+                    allBbsPosts.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                renderBBS();
+            });
+        }
+
+        function renderBBS() {
+            const list = document.getElementById('bbs-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            const keyword = document.getElementById('bbs-search')?.value.toLowerCase().trim() || '';
+
+            const filtered = allBbsPosts.filter(post => {
+                const searchTarget = `${post.title} ${post.text} ${post.userName || ''}`.toLowerCase();
+                return searchTarget.includes(keyword);
+            });
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.5); text-align:center; margin-top:20px;">投稿がありません。</p>';
+                return;
+            }
+
+            filtered.forEach((data) => {
+                const div = document.createElement('div');
+                const isHigh = data.priority === 'high';
+                div.className = `post ${isHigh ? 'priority-high' : ''}`;
+
+                const dateBadge = data.date ? `<span class="badge badge-date">📅 ${data.date}</span>` : '';
+                const priorityBadge = isHigh 
+                    ? `<span class="badge badge-high">🚨 重要</span>` 
+                    : `<span class="badge badge-normal">💬 通常</span>`;
+
+                div.innerHTML = `
+                    <div class="post-title">${data.title}</div>
+                    <div style="margin-bottom: 8px;">
+                        ${priorityBadge}
+                        ${dateBadge}
+                        <span class="badge badge-user">👤 ${data.userName || '部員'}</span>
+                        <span style="font-size:0.75rem; color:rgba(255,255,255,0.5);">${formatDateTime(data.createdAt)}</span>
+                    </div>
+                    <p style="white-space:pre-wrap; margin:0; font-size:0.95rem;">${data.text}</p>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('bbs-search')?.addEventListener('input', renderBBS);
+
         // 📦 備品初期データ
         const initialTools = [
             { name: "テンションゲージ", location: "計測用", category: "📏 計測・文房具", memo: "5" },
@@ -728,7 +817,6 @@
                     const msgId = change.doc.id;
                     const readByList = docData.readBy || [];
 
-                    // 👁️ 未既読メッセージなら自分のUIDを自動追加
                     if (currentUserUid && !readByList.includes(currentUserUid)) {
                         const msgRef = doc(db, `chats_${currentChatRoom}`, msgId);
                         updateDoc(msgRef, {
@@ -750,10 +838,8 @@
             const timeStr = formatDateTime(data.createdAt);
             const readByList = data.readBy || [];
             
-            // 👁️ 自分以外の読んだ人数を計算（自分をカウントから除く）
             const otherReadCount = Math.max(0, readByList.length - 1);
 
-            // 自分のメッセージ かつ 1人以上が読んでいる場合のみ「既読 N」を表示
             let readText = '';
             if (isMyMsg && otherReadCount > 0) {
                 readText = `<span class="read-count">既読 ${otherReadCount}</span>`;
@@ -790,7 +876,7 @@
                     userName: currentUserName,
                     uid: currentUserUid,
                     createdAt: new Date(),
-                    readBy: [currentUserUid] // 👁️ 送信者自身を既読にして保存
+                    readBy: [currentUserUid]
                 });
                 input.value = '';
             } catch (e) {
@@ -830,6 +916,7 @@
                         appContainer.style.display = 'block';
                         
                         await checkAndInitTools();
+                        loadBBS();
                         loadTools();
                         loadRecords();
                         loadChatMessages();
