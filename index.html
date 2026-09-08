@@ -328,9 +328,11 @@
             <button id="nav-record">📝 練習記録</button>
             <button id="nav-maintenance">🛠️ ヨット管理</button>
             <button id="nav-tools">📦 備品管理</button>
+            <button id="nav-finance">💰 会計管理</button>
+        
         </nav>
 
-        <div id="sec-weather" class="content-section active">
+        <div id="sec-weather" class="content-section active"> //ホームページ
             <h3>☀️ 江の島 天気・風速</h3>
             <p>最新の気象データや海の状況を確認しましょう。</p>
             
@@ -353,7 +355,7 @@
                 🌊 リビエラ公式ライブカメラを開く
             </a>
 
-            <div id="weather-bbs-alerts" style="margin-top: 25px; display: none;">
+            <div id="weather-bbs-alerts" style="margin-top: 25px; display: none;">　//掲示板
                 <h4 style="color: var(--accent-color); margin-bottom: 10px;">🚨 間近の予定・連絡</h4>
                 <div id="alert-list"></div>
             </div>
@@ -386,7 +388,7 @@
             <div id="bbs-list" style="margin-top: 20px;"></div>
         </div>
 
-        <div id="sec-chat" class="content-section">
+        <div id="sec-chat" class="content-section">　//チャット
             <h3>💬 チームチャット</h3>
             
             <div class="chat-room-selector">
@@ -402,7 +404,7 @@
             </div>
         </div>
 
-        <div id="sec-record" class="content-section">
+        <div id="sec-record" class="content-section">　//練習記録
             <h3>📝 練習記録</h3>
             <label for="record-date">📅 日付</label>
             <input type="date" id="record-date">
@@ -427,7 +429,7 @@
             <div id="record-list" style="margin-top: 20px;"></div>
         </div>
 
-        <div id="sec-maintenance" class="content-section">
+        <div id="sec-maintenance" class="content-section"> //ヨット管理
             <h3>🛠️ ヨット状態・整備管理</h3>
             <h4>🔧 新しい整備・状態を記録</h4>
             <label for="maint-date">📅 日付</label>
@@ -474,7 +476,7 @@
             <div id="maint-list" style="margin-top: 20px;"></div>
         </div>
 
-        <div id="sec-tools" class="content-section">
+        <div id="sec-tools" class="content-section">　//備品管理
             <h3>📦 備品・工具管理</h3>
 
             <button id="btn-toggle-add-tool" class="submit-btn" style="background-color: var(--accent-color); color: white; margin-bottom: 15px;">
@@ -527,7 +529,40 @@
         </div>
     </div>
 
-    <script type="module">
+         <div id="sec-finance" class="content-section"> //会計
+
+                <h3>💰 部活会計・領収書管理</h3>
+
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="margin-top:0; color:var(--accent-color);">📷 領収書の自動読み取り</h4>
+                <label for="receipt-image">レシート・領収書の写真を撮影/選択</label>
+                <input type="file" id="receipt-image" accept="image/*">
+                
+                <button type="button" class="submit-btn" id="btn-scan-receipt" style="background-color: var(--accent-color); color: white; margin-top: 10px;">
+                    🔍 画像から自動入力する
+                </button>
+                <div id="scan-status" style="font-size: 0.85rem; color: #ffa502; margin-top: 5px;"></div>
+            </div>
+
+            <h4>📝 支出の記録</h4>
+            <label for="finance-date">📅 日付</label>
+            <input type="date" id="finance-date">
+
+            <label for="finance-amount" style="display:block; margin-top:10px;">💴 金額（円）</label>
+            <input type="number" id="finance-amount" placeholder="例：1500">
+
+            <label for="finance-title" style="display:block; margin-top:10px;">📌 用途・品名</label>
+            <input type="text" id="finance-title" placeholder="例：ガソリン代、レスキュー艇補修用品">
+
+            <label for="finance-payer" style="display:block; margin-top:10px;">👤 支払者（立替人）</label>
+            <input type="text" id="finance-payer" placeholder="例：海大 太郎">
+
+            <button class="submit-btn" id="btn-finance-submit" style="margin-top:20px;">支出を記録する</button>
+
+            <div id="finance-list" style="margin-top: 20px;">
+ </div>
+    </div>                
+                <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
