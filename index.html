@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="ja"><head>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YACHT NAVI Lite</title>
@@ -38,263 +40,140 @@
             position: absolute;
             right: 15px;
             top: 12px;
-            background-color: var(--danger-color);
-            color: white;
-            border: none;
+            background-color: transparent;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
             padding: 5px 10px;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
             font-size: 0.8rem;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin-top: 20px;
+            margin-bottom: 80px;
         }
         nav {
             display: flex;
             justify-content: space-around;
-            width: 100%;
             background-color: var(--card-bg);
-            padding: 10px 0;
-            flex-wrap: wrap;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 600px;
+            border-top: 1px solid var(--accent-color);
+            z-index: 1000;
         }
         nav button {
             background: none;
             border: none;
             color: var(--text-color);
-            font-size: 0.85rem;
-            padding: 8px 10px;
+            padding: 12px 5px;
+            font-size: 0.75rem;
+            flex: 1;
             cursor: pointer;
-            border-radius: 5px;
-            margin: 2px;
+            text-align: center;
         }
         nav button.active {
-            background-color: var(--accent-color);
+            color: var(--accent-color);
+            font-weight: bold;
+            border-top: 3px solid var(--accent-color);
         }
         .content-section {
             display: none;
-            width: 90%;
-            max-width: 500px;
-            margin: 20px auto 0 auto;
             background-color: var(--card-bg);
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
-            box-sizing: border-box;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         .content-section.active {
             display: block;
         }
-        input, textarea, select, button.submit-btn {
+        input, select, textarea {
             width: 100%;
             padding: 10px;
-            margin-top: 10px;
+            margin-top: 5px;
             border-radius: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background-color: rgba(0, 0, 0, 0.2);
-            color: var(--text-color);
+            border: 1px solid #3a506b;
+            background-color: #0b132b;
+            color: white;
             box-sizing: border-box;
         }
-        select option {
-            background-color: var(--card-bg);
-            color: var(--text-color);
-        }
-        button.submit-btn {
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
             background-color: var(--btn-bg);
-            color: var(--bg-color);
+            border: none;
+            border-radius: 5px;
+            color: #0b132b;
             font-weight: bold;
             cursor: pointer;
-            border: none;
+            margin-top: 15px;
         }
         .post {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 5px;
-            margin-top: 10px;
+            background-color: #0b132b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
             border-left: 4px solid var(--accent-color);
-        }
-        .post.priority-high {
-            border-left: 5px solid var(--danger-color);
         }
         .post-title {
             font-weight: bold;
-            font-size: 1.05rem;
             color: var(--accent-color);
             margin-bottom: 5px;
         }
         .badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 12px;
             display: inline-block;
-            padding: 2px 6px;
-            font-size: 0.75rem;
-            border-radius: 3px;
-            font-weight: bold;
-            margin-right: 5px;
-            color: #fff;
+            margin-bottom: 5px;
         }
-        .badge-high { background-color: var(--danger-color); }
-        .badge-normal { background-color: rgba(255,255,255,0.2); }
-        .badge-date { background-color: #ffa502; color: #000; }
-        .badge-user { background-color: #a855f7; color: white; }
-        .badge-loc { background-color: #2ed573; color: black; }
-        .badge-cat { background-color: #eccc68; color: black; }
-
-        .group-header {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--btn-bg);
-            margin-top: 20px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid var(--btn-bg);
-        }
-
-        .tool-card {
-            background-color: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 10px;
-        }
-
-        .filter-area {
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 20px;
-            margin-bottom: 15px;
-            border: 1px dashed var(--accent-color);
-        }
-
-        /* 💬 チャット用スタイル */
-        .chat-room-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .chat-room-btn {
-            flex: 1;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--accent-color);
-            color: var(--text-color);
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .chat-room-btn.active {
-            background-color: var(--accent-color);
+        .badge-user {
+            background-color: #3a506b;
             color: white;
-        }
-        .chat-messages {
-            height: 350px;
-            overflow-y: auto;
-            background-color: rgba(0, 0, 0, 0.25);
-            border-radius: 8px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .chat-bubble-container {
-            display: flex;
-            flex-direction: column;
-            max-width: 80%;
-        }
-        .chat-bubble-container.my-msg {
-            align-self: flex-end;
-            align-items: flex-end;
-        }
-        .chat-bubble-container.other-msg {
-            align-self: flex-start;
-            align-items: flex-start;
-        }
-        .chat-user-name {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 3px;
         }
         .chat-bubble {
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            line-height: 1.4;
-            word-break: break-word;
-            white-space: pre-wrap;
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
         }
-        .my-msg .chat-bubble {
+        .my-msg {
             background-color: var(--chat-my-msg);
-            color: white;
+            margin-left: auto;
             border-bottom-right-radius: 2px;
         }
-        .other-msg .chat-bubble {
+        .other-msg {
             background-color: var(--chat-other-msg);
-            color: white;
+            margin-right: auto;
             border-bottom-left-radius: 2px;
         }
-        .chat-info-line {
-            display: flex;
-            gap: 6px;
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 3px;
-        }
-        .read-count {
-            color: var(--accent-color);
-            font-weight: bold;
-        }
-
-        .live-btn {
-            display: block;
-            text-align: center;
-            background-color: #4ea8de;
-            color: white;
-            padding: 12px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 15px;
-        }
-        .windguru-container {
+        #login-screen, #name-setup-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            overflow-x: auto;
-            margin-top: 15px;
-            border-radius: 5px;
-            background: #ffffff;
-            color: #000000;
-            padding: 5px;
-            box-sizing: border-box;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        #login-screen {
+            height: 100%;
+            background-color: var(--bg-color);
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-color);
-            z-index: 9999;
+            z-index: 2000;
         }
         .login-box {
-            width: 90%;
-            max-width: 400px;
             background-color: var(--card-bg);
-            padding: 25px;
+            padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            box-sizing: border-box;
+            width: 85%;
+            max-width: 400px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        #app-container {
-            display: none;
-            width: 100%;
-        }
-
-        #name-setup-screen {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(11, 19, 43, 0.95);
-            z-index: 10000;
-        }
-    </style></head><body>
+    </style>
+</head>
+<body>
 
     <div id="login-screen">
         <div class="login-box">
@@ -311,7 +190,7 @@
         </div>
     </div>
 
-    <div id="name-setup-screen">
+    <div id="name-setup-screen" style="display:none;">
         <div class="login-box">
             <h3 style="text-align:center; margin-top:0; color:var(--accent-color);">👤 部員名の登録</h3>
             <p style="font-size:0.9rem; color:rgba(255,255,255,0.7); text-align:center;">掲示板や記録に表示されるあなたの名前を設定してください。</p>
@@ -320,169 +199,55 @@
         </div>
     </div>
 
-    <div id="app-container">
+    <div id="app-container" class="container" style="display:none;">
         <header>
-            <span id="welcome-msg" style="font-size:0.85rem; position:absolute; left:15px; top:16px; color:rgba(255,255,255,0.6);"></span>
             ⛵ YACHT NAVI Lite
-            <button class="logout-btn" id="btn-logout">ログアウト</button>
+            <button id="btn-logout" class="logout-btn">ログアウト</button>
         </header>
 
-        <nav>
-            <button id="nav-weather" class="active">☀️ 天気予報</button>
-            <button id="nav-bbs">📋 掲示板</button>
-            <button id="nav-chat">💬 チームチャット</button>
-            <button id="nav-record">📝 練習記録</button>
-            <button id="nav-maintenance">🛠️ ヨット管理</button>
-            <button id="nav-tools">📦 備品管理</button>
-            <button id="nav-finance">💰 会計管理</button>
-        
-        </nav>
-
         <div id="sec-weather" class="content-section active">
-            <h3>☀️ 天気・風速</h3>
-            <p>最新の気象データや海の状況を確認しましょう。</p>
-            
-            <div class="windguru-container">
-                <script id="wg_fwdg_208567_100_1788794082857">
-                (function (window, document) {
-                  var loader = function () {
-                    var arg = ["s=208567" ,"m=100","uid=wg_fwdg_208567_100_1788794082857" ,"wj=ms" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=240" ,"hrsm=1" ,"vt=forecasts" ,"lng=en" ,"idbs=1" ,"p=WINDSPD,GUST,SMER,TMP"];
-                    var script = document.createElement("script");
-                    var tag = document.getElementsByTagName("script")[0];
-                    script.src = "https://www.windguru.cz/js/widget.php?"+(arg.join("&"));
-                    tag.parentNode.insertBefore(script, tag);
-                  };
-                  window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
-                })(window, document);
-                </script>
-            </div>
-
-            <a href="https://www.riviera.co.jp/area/enoshima/livecamera/" target="_blank" class="live-btn" style="margin-top: 20px;">
-                🌊 リビエラ公式ライブカメラを開く
-            </a>
-
-            <div id="weather-bbs-alerts" style="margin-top: 25px; display: none;">
-                <h4 style="color: var(--accent-color); margin-bottom: 10px;">🚨 間近の予定・連絡</h4>
-                <div id="alert-list"></div>
-            </div>
+            <h3>☀️ 練習海面の天気予報</h3>
+            <p style="font-size:0.85rem; color:rgba(255,255,255,0.7);">八景島周辺の気象データ</p>
+            <div id="weather-info">データを読み込み中...</div>
         </div>
 
         <div id="sec-bbs" class="content-section">
-            <h3>📋 部内共有掲示板</h3>
-            
-            <label for="bbs-title">📝 題名（タイトル）</label>
-            <input type="text" id="bbs-title" placeholder="例：今週末の集合時間について">
-
-            <label for="bbs-priority" style="display:block; margin-top:10px;">⚠️ 重要度</label>
-            <select id="bbs-priority">
-                <option value="normal">💬 通常連絡</option>
-                <option value="high">🚨 緊急・重要</option>
-            </select>
-
-            <label for="bbs-date" style="display:block; margin-top:10px;">📅 予定日・期限（任意）</label>
-            <input type="date" id="bbs-date">
-
-            <label for="bbs-input" style="display:block; margin-top:10px;">💬 本文（連絡内容）</label>
-            <textarea id="bbs-input" placeholder="詳しい連絡内容を入力してください..."></textarea>
-            
-            <button class="submit-btn" style="margin-top:15px;" id="btn-bbs-submit">投稿する</button>
-            
-            <div class="search-area" style="margin-top: 20px;">
-                <input type="text" id="bbs-search" placeholder="🔍 過去の連絡をキーワード検索...">
-            </div>
-            
-            <div id="bbs-list" style="margin-top: 20px;"></div>
+            <h3>📋 部内掲示板</h3>
+            <div id="bbs-list"></div>
         </div>
 
         <div id="sec-chat" class="content-section">
             <h3>💬 チームチャット</h3>
-            
-            <div class="chat-room-selector">
-                <button class="chat-room-btn active" id="btn-room-470">⛵ 470級</button>
-                <button class="chat-room-btn" id="btn-room-snipe">⛵ スナイプ級</button>
-            </div>
-
-            <div class="chat-messages" id="chat-messages-container"></div>
-
-            <div style="margin-top: 10px;">
-                <textarea id="chat-input-text" placeholder="メッセージを入力..." rows="2" style="resize: none;"></textarea>
-                <button class="submit-btn" id="btn-send-chat" style="margin-top: 8px;">送信する 🚀</button>
-            </div>
+            <div id="chat-messages" style="height: 300px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 15px;"></div>
+            <input type="text" id="chat-input" placeholder="メッセージを入力...">
+            <button class="submit-btn" id="btn-send-chat">送信</button>
         </div>
 
         <div id="sec-record" class="content-section">
             <h3>📝 練習記録</h3>
-            <label for="record-date">📅 日付</label>
-            <input type="date" id="record-date">
-
-            <label for="record-class" style="display:block; margin-top:10px;">⛵ クラス</label>
-            <select id="record-class">
-                <option value="">-- クラスを選択してください --</option>
-                <option value="470">470</option>
-                <option value="スナイプ">スナイプ</option>
-                <option value="レスキュー艇">レスキュー艇</option>
-            </select>
-
-            <label for="record-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
-            <select id="record-boat" disabled>
-                <option value="">-- 先にクラスを選択してください --</option>
-            </select>
-
-            <label for="record-text" style="display:block; margin-top:10px;">📝 練習内容・反省点</label>
-            <textarea id="record-text" placeholder="今日の練習内容や反省点..."></textarea>
-            
-            <button class="submit-btn" id="btn-record-submit">記録を保存</button>
-            <div id="record-list" style="margin-top: 20px;"></div>
+            <div id="record-list"></div>
         </div>
 
         <div id="sec-maintenance" class="content-section">
-            <h3>🛠️ ヨット状態・整備管理</h3>
-            <h4>🔧 新しい整備・状態を記録</h4>
-            <label for="maint-date">📅 日付</label>
-            <input type="date" id="maint-date">
-
-            <label for="maint-class" style="display:block; margin-top:10px;">⛵ クラス</label>
-            <select id="maint-class">
-                <option value="">-- クラスを選択してください --</option>
-                <option value="470">470</option>
-                <option value="スナイプ">スナイプ</option>
-                <option value="レスキュー艇">レスキュー艇</option>
+            <h3>🛠️ ヨット整備・艇体管理</h3>
+            <label for="maint-boat-select">⛵ 艇体を選択</label>
+            <select id="maint-boat-select">
+                <option value="470 - 4811">470 - 4811</option>
+                <option value="470 - 4688">470 - 4688</option>
+                <option value="470 - 4541">470 - 4541</option>
+                <option value="470 - 4390">470 - 4390</option>
+                <option value="470 - 4252">470 - 4252</option>
+                <option value="スナイプ - 31287">スナイプ - 31287</option>
+                <option value="スナイプ - 31245">スナイプ - 31245</option>
+                <option value="スナイプ - 31067">スナイプ - 31067</option>
+                <option value="スナイプ - 28675">スナイプ - 28675</option>
+                <option value="スナイプ - 30575">スナイプ - 30575</option>
+                <option value="陸待or整備">陸待or整備</option>
             </select>
-
-            <label for="maint-boat" style="display:block; margin-top:10px;">🔢 艇番</label>
-            <select id="maint-boat" disabled>
-                <option value="">-- 先にクラスを選択してください --</option>
-            </select>
-
-            <label for="maint-text" style="display:block; margin-top:10px;">📝 整備メモ・セール管理状況</label>
-            <textarea id="maint-text" placeholder="整備箇所やセールの状態を入力..."></textarea>
-
-            <button class="submit-btn" style="margin-top:20px;" id="btn-maint-submit">管理記録を保存</button>
-            
-            <div class="filter-area">
-                <label>🔍 表示する艇を絞り込む</label>
-                <select id="filter-boat">
-                    <option value="all">🔄 すべての艇番を表示</option>
-                    <option value="4237">470 - 4237</option>
-                    <option value="4146">470 - 4146</option>
-                    <option value="4706">470 - 4706</option>
-                    <option value="4572">470 - 4572</option>
-                    <option value="ネプチューン">レスキュー艇 - ネプチューン</option>
-                    <option value="パルパロ5">レスキュー艇 - パルパロ5</option>
-                    <option value="牛若丸">レスキュー艇 - 牛若丸</option>
-                    <option value="31594">スナイプ - 31594</option>
-                    <option value="31287">スナイプ - 31287</option>
-                    <option value="31245">スナイプ - 31245</option>
-                    <option value="31067">スナイプ - 31067</option>
-                    <option value="28675">スナイプ - 28675</option>
-                    <option value="30575">スナイプ - 30575</option>
-                    <option value="陸待or整備">陸待or整備</option>
-                </select>
-            </div>
             <div id="maint-list" style="margin-top: 20px;"></div>
         </div>
 
-<div id="sec-tools" class="content-section">
+        <div id="sec-tools" class="content-section">
             <h3>📦 備品・工具管理</h3>
 
             <button id="btn-toggle-add-tool" class="submit-btn" style="background-color: var(--accent-color); color: white; margin-bottom: 15px;">
@@ -532,7 +297,9 @@
             </div>
 
             <div id="tools-list" style="margin-top: 10px;"></div>
-        </div> <div id="sec-finance" class="content-section">
+        </div>
+
+        <div id="sec-finance" class="content-section">
             <h3>💰 部活会計・領収書管理</h3>
 
             <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
@@ -561,43 +328,26 @@
 
             <button class="submit-btn" id="btn-finance-submit" style="margin-top:20px;">支出を記録する</button>
 
-            <div id="finance-list" style="margin-top: 20px;">
-                
-            </div>
-                                                                 
-<script type="module">
-    // 1️⃣ 必要な機能をFirebaseから読み込む
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+            <div id="finance-list" style="margin-top: 20px;"></div>
+        </div>
 
-    // 2️⃣ 発見した設定情報をセットする
-    const firebaseConfig = {
-        apiKey: "AIzaSyCQ0eCrYy3xYLAis0b3g4FqqOaKeYRYJf8",
-        authDomain: "yacht-navi-app.firebaseapp.com",
-        projectId: "yacht-navi-app",
-        storageBucket: "yacht-navi-app.firebasestorage.app",
-        messagingSenderId: "724690722034",
-        appId: "1:724690722034:web:bbe564c44ee6eec06e846b",
-        measurementId: "G-22RYBZG8MW"
-    };
+        <nav>
+            <button id="nav-weather" class="active">☀️ 天気</button>
+            <button id="nav-bbs">📋 掲示板</button>
+            <button id="nav-chat">💬 チャット</button>
+            <button id="nav-record">📝 記録</button>
+            <button id="nav-maintenance">🛠️ 整備</button>
+            <button id="nav-tools">📦 備品</button>
+            <button id="nav-finance">💰 会計</button>
+        </nav>
+    </div>
 
-    // 3️⃣ Firebaseを初期化する（接続を確立する）
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-            // 3️⃣ その下に処理（イベントリスナー）を書きます
-            document.getElementById('btn-finance-submit')?.addEventListener('click', async () => {
-                // 支出保存の処理
-            });
-        </script>
-        
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { 
-            getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, getDocs, updateDoc, arrayUnion 
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+        // Firebase初期化 🔑
         const firebaseConfig = {
             apiKey: "AIzaSyCQ0eCrYy3xYLAis0b3g4FqqOaKeYRYJf8",
             authDomain: "yacht-navi-app.firebaseapp.com",
@@ -612,402 +362,172 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUserName = "未設定部員";
-        let currentUserUid = "";
-        let currentChatRoom = "470";
-        let chatUnsubscribe = null;
+        let currentUserUid = null;
+        let currentUserName = "匿名部員";
 
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyP8-MWJyATLOuhDT79pJZftV0agLCw6cgOaRLzmzK35Aogcti5uI4X2KEx84tMKuBG/exec";
-
-        // ⏱️ 日時フォーマット関数
-        function formatDateTime(dateObj) {
-            if (!dateObj) return "";
-            const d = dateObj.toDate ? dateObj.toDate() : new Date(dateObj);
-            const month = d.getMonth() + 1;
-            const day = d.getDate();
-            const hours = String(d.getHours()).padStart(2, '0');
-            const minutes = String(d.getMinutes()).padStart(2, '0');
+        function formatDateTime(timestamp) {
+            if (!timestamp) return '';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
             return `${month}/${day} ${hours}:${minutes}`;
         }
 
-        // 📋 掲示板機能
-        document.getElementById('btn-bbs-submit')?.addEventListener('click', async () => {
-            const title = document.getElementById('bbs-title').value.trim();
-            const priority = document.getElementById('bbs-priority').value;
-            const date = document.getElementById('bbs-date').value;
-            const text = document.getElementById('bbs-input').value.trim();
-
-            if (!title || !text) {
-                alert('題名と本文を入力してください。');
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "bbs"), {
-                    title,
-                    priority,
-                    date,
-                    text,
-                    userName: currentUserName,
-                    uid: currentUserUid,
-                    createdAt: new Date()
-                });
-
-                document.getElementById('bbs-title').value = '';
-                document.getElementById('bbs-date').value = '';
-                document.getElementById('bbs-input').value = '';
-
-                alert('📋 掲示板に投稿しました！');
-            } catch (e) {
-                console.error("掲示板投稿エラー:", e);
-                alert('投稿に失敗しました。');
-            }
-        });
-
-        let allBbsPosts = [];
-        function loadBBS() {
-            const q = query(collection(db, "bbs"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snapshot) => {
-                allBbsPosts = [];
-                snapshot.forEach((docSnap) => {
-                    allBbsPosts.push({ id: docSnap.id, ...docSnap.data() });
-                });
-                renderBBS();
-            });
-        }
-
-        function renderBBS() {
-            const list = document.getElementById('bbs-list');
-            if (!list) return;
-            list.innerHTML = '';
-
-            const keyword = document.getElementById('bbs-search')?.value.toLowerCase().trim() || '';
-
-            const filtered = allBbsPosts.filter(post => {
-                const searchTarget = `${post.title} ${post.text} ${post.userName || ''}`.toLowerCase();
-                return searchTarget.includes(keyword);
-            });
-
-            if (filtered.length === 0) {
-                list.innerHTML = '<p style="color:rgba(255,255,255,0.5); text-align:center; margin-top:20px;">投稿がありません。</p>';
-                return;
-            }
-
-            filtered.forEach((data) => {
-                const div = document.createElement('div');
-                const isHigh = data.priority === 'high';
-                div.className = `post ${isHigh ? 'priority-high' : ''}`;
-
-                const dateBadge = data.date ? `<span class="badge badge-date">📅 ${data.date}</span>` : '';
-                const priorityBadge = isHigh 
-                    ? `<span class="badge badge-high">🚨 重要</span>` 
-                    : `<span class="badge badge-normal">💬 通常</span>`;
-
-                div.innerHTML = `
-                    <div class="post-title">${data.title}</div>
-                    <div style="margin-bottom: 8px;">
-                        ${priorityBadge}
-                        ${dateBadge}
-                        <span class="badge badge-user">👤 ${data.userName || '部員'}</span>
-                        <span style="font-size:0.75rem; color:rgba(255,255,255,0.5);">${formatDateTime(data.createdAt)}</span>
-                    </div>
-                    <p style="white-space:pre-wrap; margin:0; font-size:0.95rem;">${data.text}</p>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        document.getElementById('bbs-search')?.addEventListener('input', renderBBS);
-
-        // 📦 備品初期データ
-        const initialTools = [
-            { name: "テンションゲージ", location: "計測用", category: "📏 計測・文房具", memo: "5" },
-            { name: "メジャー", location: "計測用", category: "📏 計測・文房具", memo: "2" },
-            { name: "銀テ", location: "計測用", category: "🩹 補修・テープ・ロープ類", memo: "1" },
-            { name: "直角定規", location: "計測用", category: "📏 計測・文房具", memo: "2" },
-            { name: "タイラップ", location: "計測用", category: "🩹 補修・テープ・ロープ類", memo: "たくさん" },
-            { name: "マーカー", location: "計測用", category: "📏 計測・文房具", memo: "3(黒:2,赤:1)" },
-            { name: "バスコーク", location: "工具用", category: "🧪 化学品・スプレー・油脂", memo: "5" },
-            { name: "養生テープ", location: "工具用", category: "🩹 補修・テープ・ロープ類", memo: "2" },
-            { name: "マイナスドライバー", location: "工具用", category: "🛠️ 工具・作業用品", memo: "3" },
-            { name: "プラスドライバー", location: "工具用", category: "🛠️ 工具・作業用品", memo: "7" },
-            { name: "レンチ", location: "工具用", category: "🛠️ 工具・作業用品", memo: "青セット1個と9本" },
-            { name: "ハンマー", location: "工具用", category: "🛠️ 工具・作業用品", memo: "1" },
-            { name: "ギアオイル", location: "テンダーボックス", category: "🧪 化学品・スプレー・油脂", memo: "2" },
-            { name: "船外機整備手帳", location: "テンダーボックス", category: "📄 書類・マニュアル", memo: "1" },
-            { name: "船検関連の書類", location: "テンダーボックス", category: "📄 書類・マニュアル", memo: "" },
-            { name: "セールコートスプレー", location: "スプレーボックス", category: "🧪 化学品・スプレー・油脂", memo: "1" },
-            { name: "KURE3-36", location: "スプレーボックス", category: "🧪 化学品・スプレー・油脂", memo: "1" },
-            { name: "アセトン", location: "その他", category: "🧪 化学品・スプレー・油脂", memo: "1" },
-            { name: "グラインダー", location: "その他", category: "🛠️ 工具・作業用品", memo: "1" }
-        ];
-
-        async function checkAndInitTools() {
-            try {
-                const toolsRef = collection(db, "tools");
-                const snapshot = await getDocs(toolsRef);
-                if (snapshot.empty) {
-                    for (const tool of initialTools) {
-                        await addDoc(toolsRef, tool);
-                    }
+        // 🔄 ログイン状態のリアルタイム監視
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists() && userDoc.data().name) {
+                    currentUserName = userDoc.data().name;
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('name-setup-screen').style.display = 'none';
+                    document.getElementById('app-container').style.display = 'block';
+                    
+                    loadBbsPosts();
+                    loadChatMessages();
+                    loadRecords();
+                } else {
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('name-setup-screen').style.display = 'flex';
+                    document.getElementById('app-container').style.display = 'none';
                 }
-            } catch (error) {
-                console.error("初期データ登録エラー:", error);
-            }
-        }
-
-        let allTools = [];
-        function loadTools() {
-            const toolsRef = collection(db, "tools");
-            onSnapshot(toolsRef, (snapshot) => {
-                allTools = [];
-                snapshot.forEach((docSnap) => {
-                    allTools.push({ id: docSnap.id, ...docSnap.data() });
-                });
-                renderTools();
-            });
-        }
-
-        function renderTools() {
-            const list = document.getElementById('tools-list');
-            if (!list) return;
-            list.innerHTML = '';
-
-            const groupBy = document.getElementById('tools-group-by').value;
-            const keyword = document.getElementById('tools-search').value.toLowerCase().trim();
-
-            const filtered = allTools.filter(t => {
-                const text = `${t.name} ${t.location} ${t.category || ''} ${t.memo}`.toLowerCase();
-                return text.includes(keyword);
-            });
-
-            if (filtered.length === 0) {
-                list.innerHTML = '<p style="color:rgba(255,255,255,0.5); text-align:center; margin-top:20px;">該当する備品が見つかりません。</p>';
-                return;
-            }
-
-            const groups = {};
-            filtered.forEach(tool => {
-                const key = tool[groupBy] || '未分類';
-                if (!groups[key]) groups[key] = [];
-                groups[key].push(tool);
-            });
-
-            for (const groupName in groups) {
-                const groupHeader = document.createElement('div');
-                groupHeader.className = 'group-header';
-                groupHeader.innerText = `${groupBy === 'location' ? '📍' : '🏷️'} ${groupName} (${groups[groupName].length})`;
-                list.appendChild(groupHeader);
-
-                groups[groupName].forEach(tool => {
-                    const card = document.createElement('div');
-                    card.className = 'tool-card';
-                    card.innerHTML = `
-                        <div class="post-title" style="font-size:1rem;">${tool.name}</div>
-                        <div style="margin-top:5px;">
-                            <span class="badge badge-loc">📍 ${tool.location}</span>
-                            <span class="badge badge-cat">🏷️ ${tool.category || 'その他'}</span>
-                        </div>
-                        <p style="margin-top:8px; font-size:0.85rem; color:rgba(255,255,255,0.8); margin-bottom:0;">📝 メモ/数量: ${tool.memo || 'なし'}</p>
-                    `;
-                    list.appendChild(card);
-                });
-            }
-        }
-
-        document.getElementById('tools-group-by')?.addEventListener('change', renderTools);
-        document.getElementById('tools-search')?.addEventListener('input', renderTools);
-
-        document.getElementById('btn-toggle-add-tool')?.addEventListener('click', () => {
-            const form = document.getElementById('add-tool-form');
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
-        });
-
-        document.getElementById('btn-save-tool')?.addEventListener('click', async () => {
-            const name = document.getElementById('new-tool-name').value.trim();
-            const location = document.getElementById('new-tool-location').value;
-            const category = document.getElementById('new-tool-category').value;
-            const memo = document.getElementById('new-tool-memo').value.trim();
-
-            if (!name) {
-                alert('備品名を入力してください。');
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "tools"), {
-                    name, location, category, memo,
-                    createdAt: new Date()
-                });
-                document.getElementById('new-tool-name').value = '';
-                document.getElementById('new-tool-memo').value = '';
-                document.getElementById('add-tool-form').style.display = 'none';
-                alert('📦 備品を追加しました！');
-            } catch (e) {
-                console.error("備品追加エラー:", e);
-                alert('備品の追加に失敗しました。');
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('name-setup-screen').style.display = 'none';
+                document.getElementById('app-container').style.display = 'none';
             }
         });
 
-        // 💬 チャット処理 (既読機能付き)
-        function switchChatRoom(roomName) {
-            currentChatRoom = roomName;
-            document.getElementById('btn-room-470').classList.toggle('active', roomName === '470');
-            document.getElementById('btn-room-snipe').classList.toggle('active', roomName === 'snipe');
-            loadChatMessages();
-        }
-
-        document.getElementById('btn-room-470')?.addEventListener('click', () => switchChatRoom('470'));
-        document.getElementById('btn-room-snipe')?.addEventListener('click', () => switchChatRoom('snipe'));
-
-        function loadChatMessages() {
-            if (chatUnsubscribe) chatUnsubscribe();
-
-            const chatRef = collection(db, `chats_${currentChatRoom}`);
-            const q = query(chatRef, orderBy("createdAt", "asc"));
-
-            chatUnsubscribe = onSnapshot(q, (snapshot) => {
-                const container = document.getElementById('chat-messages-container');
-                if (!container) return;
-
-                snapshot.docChanges().forEach((change) => {
-                    const docData = change.doc.data();
-                    const msgId = change.doc.id;
-                    const readByList = docData.readBy || [];
-
-                    if (currentUserUid && !readByList.includes(currentUserUid)) {
-                        const msgRef = doc(db, `chats_${currentChatRoom}`, msgId);
-                        updateDoc(msgRef, {
-                            readBy: arrayUnion(currentUserUid)
-                        });
-                    }
-
-                    if (change.type === "added" || change.type === "modified") {
-                        renderMessage(msgId, docData, container);
-                    }
-                });
-
-                container.scrollTop = container.scrollHeight;
-            });
-        }
-
-        function renderMessage(id, data, container) {
-            const isMyMsg = data.uid === currentUserUid;
-            const timeStr = formatDateTime(data.createdAt);
-            const readByList = data.readBy || [];
-            
-            const otherReadCount = Math.max(0, readByList.length - 1);
-
-            let readText = '';
-            if (isMyMsg && otherReadCount > 0) {
-                readText = `<span class="read-count">既読 ${otherReadCount}</span>`;
-            }
-
-            let msgContainer = document.getElementById(`msg-${id}`);
-
-            if (!msgContainer) {
-                msgContainer = document.createElement('div');
-                msgContainer.id = `msg-${id}`;
-                msgContainer.className = `chat-bubble-container ${isMyMsg ? 'my-msg' : 'other-msg'}`;
-                container.appendChild(msgContainer);
-            }
-
-            msgContainer.innerHTML = `
-                <div class="chat-user-name">${data.userName || '部員'}</div>
-                <div class="chat-bubble">${data.text}</div>
-                <div class="chat-info-line">
-                    ${readText}
-                    <span class="chat-time">${timeStr}</span>
-                </div>
-            `;
-        }
-
-        document.getElementById('btn-send-chat')?.addEventListener('click', async () => {
-            const input = document.getElementById('chat-input-text');
-            const text = input.value.trim();
-
-            if (!text || !currentUserUid) return;
-
-            try {
-                await addDoc(collection(db, `chats_${currentChatRoom}`), {
-                    text,
-                    userName: currentUserName,
-                    uid: currentUserUid,
-                    createdAt: new Date(),
-                    readBy: [currentUserUid]
-                });
-                input.value = '';
-            } catch (e) {
-                console.error("チャット送信エラー:", e);
-                alert('メッセージの送信に失敗しました。');
-            }
-        });
-
-        // ログイン機能と監視
+        // 🔑 ログインボタン
         document.getElementById('btn-login')?.addEventListener('click', async () => {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                alert('📧 メールアドレスと🔑 パスワードを入力してください。');
+                return;
+            }
+
             try {
                 await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.error('ログインエラー:', error);
+                alert('❌ ログインに失敗しました: ' + error.message);
+            }
+        });
+
+        // 👤 名前保存ボタン
+        document.getElementById('btn-save-name')?.addEventListener('click', async () => {
+            const nameInput = document.getElementById('user-display-name').value.trim();
+            if (!nameInput) {
+                alert('名前を入力してください。');
+                return;
+            }
+            if (currentUserUid) {
+                await setDoc(doc(db, "users", currentUserUid), { name: nameInput }, { merge: true });
+                currentUserName = nameInput;
+                document.getElementById('name-setup-screen').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                loadBbsPosts();
+                loadChatMessages();
+                loadRecords();
+            }
+        });
+
+        // 🚪 ログアウト
+        document.getElementById('btn-logout')?.addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // 📦 備品追加フォームの開閉トグル
+        document.getElementById('btn-toggle-add-tool')?.addEventListener('click', () => {
+            const form = document.getElementById('add-tool-form');
+            if (form) {
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+
+        // 💰 支出記録の保存
+        document.getElementById('btn-finance-submit')?.addEventListener('click', async () => {
+            const date = document.getElementById('finance-date').value;
+            const amount = document.getElementById('finance-amount').value;
+            const title = document.getElementById('finance-title').value.trim();
+            const payer = document.getElementById('finance-payer').value.trim();
+
+            if (!date || !amount || !title) {
+                alert('📅 日付、💴 金額、📌 用途を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "finances"), {
+                    date,
+                    amount: Number(amount),
+                    title,
+                    payer: payer || currentUserName,
+                    userName: currentUserName,
+                    uid: currentUserUid,
+                    createdAt: new Date()
+                });
+
+                document.getElementById('finance-date').value = '';
+                document.getElementById('finance-amount').value = '';
+                document.getElementById('finance-title').value = '';
+                document.getElementById('finance-payer').value = '';
+
+                alert('💰 支出を記録しました！');
             } catch (e) {
-                alert("ログイン失敗: メールアドレスまたはパスワードを確認してください。");
+                console.error("支出記録エラー:", e);
+                alert('記録の保存に失敗しました。');
             }
         });
 
-        onAuthStateChanged(auth, async (user) => {
-            const loginScreen = document.getElementById('login-screen');
-            const appContainer = document.getElementById('app-container');
-            const nameSetupScreen = document.getElementById('name-setup-screen');
-            
-            if (user) {
-                currentUserUid = user.uid;
-                loginScreen.style.display = 'none';
-
-                try {
-                    const userDocRef = doc(db, "users", user.uid);
-                    const userDocSnap = await getDoc(userDocRef);
-
-                    if (userDocSnap.exists()) {
-                        currentUserName = userDocSnap.data().name;
-                        document.getElementById('welcome-msg').innerText = `${currentUserName} さん`;
-                        nameSetupScreen.style.display = 'none';
-                        appContainer.style.display = 'block';
-                        
-                        await checkAndInitTools();
-                        loadBBS();
-                        loadTools();
-                        loadRecords();
-                        loadChatMessages();
-                    } else {
-                        nameSetupScreen.style.display = 'flex';
-                    }
-                } catch (e) {
-                    console.error("ユーザーデータ取得エラー:", e);
-                }
-            } else {
-                loginScreen.style.display = 'flex';
-                appContainer.style.display = 'none';
-            }
-        });
-
-        document.getElementById('btn-logout')?.addEventListener('click', () => signOut(auth));
-
-        // ナビゲーション切り替え
-        const navButtons = document.querySelectorAll('nav button');
-        const sections = document.querySelectorAll('.content-section');
-
-        navButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const targetId = button.id.replace('nav-', 'sec-');
-                
-                navButtons.forEach(btn => btn.classList.remove('active'));
-                sections.forEach(sec => sec.classList.remove('active'));
-
-                button.classList.add('active');
-                document.getElementById(targetId)?.classList.add('active');
+        // 📋 掲示板読み込み
+        function loadBbsPosts() {
+            const q = query(collection(db, "bbs_posts"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('bbs-list');
+                if(!list) return;
+                list.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'post';
+                    div.innerHTML = `
+                        <div class="post-title">${data.title}</div>
+                        <div><span class="badge badge-user">👤 ${data.userName || '不明'}</span></div>
+                        <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.content}</p>
+                    `;
+                    list.appendChild(div);
+                });
             });
-        });
+        }
 
+        // 💬 チャット読み込み
+        function loadChatMessages() {
+            const q = query(collection(db, "chat_messages"), orderBy("createdAt", "asc"));
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('chat-messages');
+                if(!list) return;
+                list.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const div = document.createElement('div');
+                    const isMe = data.uid === currentUserUid;
+                    div.className = `chat-bubble ${isMe ? 'my-msg' : 'other-msg'}`;
+                    div.innerHTML = `
+                        <div style="font-size:0.75rem; opacity:0.8;">${data.userName}</div>
+                        <div>${data.text}</div>
+                    `;
+                    list.appendChild(div);
+                });
+            });
+        }
+
+        // 📝 練習記録読み込み
         function loadRecords() {
             const q = query(collection(db, "records"), orderBy("date", "desc"));
             onSnapshot(q, (snapshot) => {
@@ -1028,6 +548,22 @@
                 });
             });
         }
+
+        // 🔘 タブ切り替え処理
+        const navButtons = document.querySelectorAll('nav button');
+        const sections = document.querySelectorAll('.content-section');
+
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.id.replace('nav-', 'sec-');
+                
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                sections.forEach(sec => sec.classList.remove('active'));
+
+                button.classList.add('active');
+                document.getElementById(targetId)?.classList.add('active');
+            });
+        });
     </script>
 </body>
 </html>
