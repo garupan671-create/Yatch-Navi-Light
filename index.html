@@ -225,16 +225,10 @@
             color: white;
             border-bottom-left-radius: 2px;
         }
-        .chat-info-line {
-            display: flex;
-            gap: 6px;
+        .chat-time {
             font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.4);
             margin-top: 3px;
-        }
-        .read-count {
-            color: var(--accent-color);
-            font-weight: bold;
         }
 
         .live-btn {
@@ -334,19 +328,17 @@
             <button id="nav-record">📝 練習記録</button>
             <button id="nav-maintenance">🛠️ ヨット管理</button>
             <button id="nav-tools">📦 備品管理</button>
-            <button id="nav-finance">💰 会計管理</button>
-        
         </nav>
 
         <div id="sec-weather" class="content-section active">
-            <h3>☀️ 天気・風速</h3>
+            <h3>☀️ 江の島 天気・風速</h3>
             <p>最新の気象データや海の状況を確認しましょう。</p>
             
             <div class="windguru-container">
-                <script id="wg_fwdg_208567_100_1788794082857">
+                <script id="wg_fwdg_167452_100_1781852440051">
                 (function (window, document) {
                   var loader = function () {
-                    var arg = ["s=208567" ,"m=100","uid=wg_fwdg_208567_100_1788794082857" ,"wj=ms" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=240" ,"hrsm=1" ,"vt=forecasts" ,"lng=en" ,"idbs=1" ,"p=WINDSPD,GUST,SMER,TMP"];
+                    var arg = ["s=167452" ,"m=100","uid=wg_fwdg_167452_100_1781852440051" ,"wj=knots" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=240" ,"hrsm=2" ,"vt=forecasts" ,"lng=en" ,"idbs=1" ,"p=WINDSPD,GUST,SMER,TMPE,FLHGT,CDC,APCP1s,RATING"];
                     var script = document.createElement("script");
                     var tag = document.getElementsByTagName("script")[0];
                     script.src = "https://www.windguru.cz/js/widget.php?"+(arg.join("&"));
@@ -529,49 +521,16 @@
 
                 <label style="display:block; margin-top:10px;">🔍 備品名やメモで検索</label>
                 <input type="text" id="tools-search" placeholder="キーワードを入力..." style="margin-top:5px;">
-            <div id="tools-list" style="margin-top: 10px;">
-                
-    </div>            
-    
-        <div id="sec-finance" class="content-section">
-            <h3>💰 部活会計・領収書管理</h3>
-
-            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin-top:0; color:var(--accent-color);">📷 領収書の自動読み取り</h4>
-                <label for="receipt-image">レシート・領収書の写真を撮影/選択</label>
-                <input type="file" id="receipt-image" accept="image/*">
-                
-                <button type="button" class="submit-btn" id="btn-scan-receipt" style="background-color: var(--accent-color); color: white; margin-top: 10px;">
-                    🔍 画像から自動入力する
-                </button>
-                <div id="scan-status" style="font-size: 0.85rem; color: #ffa502; margin-top: 5px;"></div>
             </div>
 
-            <h4>📝 支出の記録</h4>
-            <label for="finance-date">📅 日付</label>
-            <input type="date" id="finance-date">
+            <div id="tools-list" style="margin-top: 10px;"></div>
+        </div>
+    </div>
 
-            <label for="finance-amount" style="display:block; margin-top:10px;">💴 金額（円）</label>
-            <input type="number" id="finance-amount" placeholder="例：1500">
-
-            <label for="finance-title" style="display:block; margin-top:10px;">📌 用途・品名</label>
-            <input type="text" id="finance-title" placeholder="例：ガソリン代、レスキュー艇補修用品">
-
-            <label for="finance-payer" style="display:block; margin-top:10px;">👤 支払者（立替人）</label>
-            <input type="text" id="finance-payer" placeholder="例：海大 太郎">
-
-            <button class="submit-btn" id="btn-finance-submit" style="margin-top:20px;">支出を記録する</button>
-
-            <div id="finance-list" style="margin-top: 20px;">
-        
-         </div> 
-         </div>            
-        <script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { 
-            getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, getDocs, updateDoc, arrayUnion 
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCQ0eCrYy3xYLAis0b3g4FqqOaKeYRYJf8",
@@ -604,95 +563,6 @@
             const minutes = String(d.getMinutes()).padStart(2, '0');
             return `${month}/${day} ${hours}:${minutes}`;
         }
-
-        // 📋 掲示板機能
-        document.getElementById('btn-bbs-submit')?.addEventListener('click', async () => {
-            const title = document.getElementById('bbs-title').value.trim();
-            const priority = document.getElementById('bbs-priority').value;
-            const date = document.getElementById('bbs-date').value;
-            const text = document.getElementById('bbs-input').value.trim();
-
-            if (!title || !text) {
-                alert('題名と本文を入力してください。');
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "bbs"), {
-                    title,
-                    priority,
-                    date,
-                    text,
-                    userName: currentUserName,
-                    uid: currentUserUid,
-                    createdAt: new Date()
-                });
-
-                document.getElementById('bbs-title').value = '';
-                document.getElementById('bbs-date').value = '';
-                document.getElementById('bbs-input').value = '';
-
-                alert('📋 掲示板に投稿しました！');
-            } catch (e) {
-                console.error("掲示板投稿エラー:", e);
-                alert('投稿に失敗しました。');
-            }
-        });
-
-        let allBbsPosts = [];
-        function loadBBS() {
-            const q = query(collection(db, "bbs"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snapshot) => {
-                allBbsPosts = [];
-                snapshot.forEach((docSnap) => {
-                    allBbsPosts.push({ id: docSnap.id, ...docSnap.data() });
-                });
-                renderBBS();
-            });
-        }
-
-        function renderBBS() {
-            const list = document.getElementById('bbs-list');
-            if (!list) return;
-            list.innerHTML = '';
-
-            const keyword = document.getElementById('bbs-search')?.value.toLowerCase().trim() || '';
-
-            const filtered = allBbsPosts.filter(post => {
-                const searchTarget = `${post.title} ${post.text} ${post.userName || ''}`.toLowerCase();
-                return searchTarget.includes(keyword);
-            });
-
-            if (filtered.length === 0) {
-                list.innerHTML = '<p style="color:rgba(255,255,255,0.5); text-align:center; margin-top:20px;">投稿がありません。</p>';
-                return;
-            }
-
-            filtered.forEach((data) => {
-                const div = document.createElement('div');
-                const isHigh = data.priority === 'high';
-                div.className = `post ${isHigh ? 'priority-high' : ''}`;
-
-                const dateBadge = data.date ? `<span class="badge badge-date">📅 ${data.date}</span>` : '';
-                const priorityBadge = isHigh 
-                    ? `<span class="badge badge-high">🚨 重要</span>` 
-                    : `<span class="badge badge-normal">💬 通常</span>`;
-
-                div.innerHTML = `
-                    <div class="post-title">${data.title}</div>
-                    <div style="margin-bottom: 8px;">
-                        ${priorityBadge}
-                        ${dateBadge}
-                        <span class="badge badge-user">👤 ${data.userName || '部員'}</span>
-                        <span style="font-size:0.75rem; color:rgba(255,255,255,0.5);">${formatDateTime(data.createdAt)}</span>
-                    </div>
-                    <p style="white-space:pre-wrap; margin:0; font-size:0.95rem;">${data.text}</p>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        document.getElementById('bbs-search')?.addEventListener('input', renderBBS);
 
         // 📦 備品初期データ
         const initialTools = [
@@ -824,7 +694,7 @@
             }
         });
 
-        // 💬 チャット処理 (既読機能付き)
+        // 💬 チャット処理
         function switchChatRoom(roomName) {
             currentChatRoom = roomName;
             document.getElementById('btn-room-470').classList.toggle('active', roomName === '470');
@@ -844,88 +714,46 @@
             chatUnsubscribe = onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('chat-messages-container');
                 if (!container) return;
+                container.innerHTML = '';
 
-                snapshot.docChanges().forEach((change) => {
-                    const docData = change.doc.data();
-                    const msgId = change.doc.id;
-                    const readByList = docData.readBy || [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const isMyMsg = data.uid === currentUserUid;
 
-                    if (currentUserUid && !readByList.includes(currentUserUid)) {
-                        const msgRef = doc(db, `chats_${currentChatRoom}`, msgId);
-                        updateDoc(msgRef, {
-                            readBy: arrayUnion(currentUserUid)
-                        });
-                    }
+                    const msgContainer = document.createElement('div');
+                    msgContainer.className = `chat-bubble-container ${isMyMsg ? 'my-msg' : 'other-msg'}`;
 
-                    if (change.type === "added" || change.type === "modified") {
-                        renderMessage(msgId, docData, container);
-                    }
+                    const timeStr = formatDateTime(data.createdAt);
+
+                    msgContainer.innerHTML = `
+                        <div class="chat-user-name">${data.userName || '部員'}</div>
+                        <div class="chat-bubble">${data.text}</div>
+                        <div class="chat-time">${timeStr}</div>
+                    `;
+                    container.appendChild(msgContainer);
                 });
 
                 container.scrollTop = container.scrollHeight;
             });
         }
 
-        function renderMessage(id, data, container) {
-            const isMyMsg = data.uid === currentUserUid;
-            const timeStr = formatDateTime(data.createdAt);
-            const readByList = data.readBy || [];
-            
-            const otherReadCount = Math.max(0, readByList.length - 1);
-
-            let readText = '';
-            if (isMyMsg && otherReadCount > 0) {
-                readText = `<span class="read-count">既読 ${otherReadCount}</span>`;
-            }
-
-            let msgContainer = document.getElementById(`msg-${id}`);
-
-            if (!msgContainer) {
-                msgContainer = document.createElement('div');
-                msgContainer.id = `msg-${id}`;
-                msgContainer.className = `chat-bubble-container ${isMyMsg ? 'my-msg' : 'other-msg'}`;
-                container.appendChild(msgContainer);
-            }
-
-            msgContainer.innerHTML = `
-                <div class="chat-user-name">${data.userName || '部員'}</div>
-                <div class="chat-bubble">${data.text}</div>
-                <div class="chat-info-line">
-                    ${readText}
-                    <span class="chat-time">${timeStr}</span>
-                </div>
-            `;
-        }
-
         document.getElementById('btn-send-chat')?.addEventListener('click', async () => {
             const input = document.getElementById('chat-input-text');
             const text = input.value.trim();
 
-            if (!text || !currentUserUid) return;
+            if (!text) return;
 
             try {
                 await addDoc(collection(db, `chats_${currentChatRoom}`), {
                     text,
                     userName: currentUserName,
                     uid: currentUserUid,
-                    createdAt: new Date(),
-                    readBy: [currentUserUid]
+                    createdAt: new Date()
                 });
                 input.value = '';
             } catch (e) {
                 console.error("チャット送信エラー:", e);
                 alert('メッセージの送信に失敗しました。');
-            }
-        });
-
-        // ログイン機能と監視
-        document.getElementById('btn-login')?.addEventListener('click', async () => {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (e) {
-                alert("ログイン失敗: メールアドレスまたはパスワードを確認してください。");
             }
         });
 
@@ -936,6 +764,17 @@
             
             if (user) {
                 currentUserUid = user.uid;
+                if ('Notification' in window) {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission().then((permission) => {
+                    if (permission === 'granted') {
+                        console.log('🔔 通知が許可されました！');
+                    } else if (permission === 'denied') {
+                        console.log('❌ 通知が拒否されました');
+                    }
+                });
+            }
+        }                
                 loginScreen.style.display = 'none';
 
                 try {
@@ -949,38 +788,343 @@
                         appContainer.style.display = 'block';
                         
                         await checkAndInitTools();
-                        loadBBS();
                         loadTools();
                         loadRecords();
+                        loadMaintenanceRecords();
+                        loadBbsPosts();
                         loadChatMessages();
                     } else {
+                        appContainer.style.display = 'none';
                         nameSetupScreen.style.display = 'flex';
                     }
                 } catch (e) {
-                    console.error("ユーザーデータ取得エラー:", e);
+                    console.error("ユーザー情報の取得エラー:", e);
                 }
             } else {
                 loginScreen.style.display = 'flex';
                 appContainer.style.display = 'none';
+                nameSetupScreen.style.display = 'none';
+                document.getElementById('welcome-msg').innerText = "";
             }
         });
 
-        document.getElementById('btn-logout')?.addEventListener('click', () => signOut(auth));
+        document.getElementById('btn-save-name').addEventListener('click', async () => {
+            const nameInput = document.getElementById('user-display-name').value.trim();
+            if (!nameInput) {
+                alert('名前を入力してください。');
+                return;
+            }
 
-        // ナビゲーション切り替え
-        const navButtons = document.querySelectorAll('nav button');
-        const sections = document.querySelectorAll('.content-section');
-
-        navButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const targetId = button.id.replace('nav-', 'sec-');
+            try {
+                await setDoc(doc(db, "users", currentUserUid), {
+                    name: nameInput,
+                    email: auth.currentUser.email
+                });
+                currentUserName = nameInput;
+                document.getElementById('welcome-msg').innerText = `${currentUserName} さん`;
+                document.getElementById('name-setup-screen').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
                 
-                navButtons.forEach(btn => btn.classList.remove('active'));
-                sections.forEach(sec => sec.classList.remove('active'));
+                await checkAndInitTools();
+                loadTools();
+                loadRecords();
+                loadMaintenanceRecords();
+                loadBbsPosts();
+                loadChatMessages();
+                alert('👤 名前の登録が完了しました！');
+            } catch (e) {
+                console.error("名前の保存エラー: ", e);
+                alert('名前の保存に失敗しました。');
+            }
+        });
 
-                button.classList.add('active');
-                document.getElementById(targetId)?.classList.add('active');
+        document.getElementById('btn-login').addEventListener('click', () => {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                alert('IDとパスワードを入力してください。');
+                return;
+            }
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => { alert('🎉 ログインに成功しました！'); })
+                .catch((error) => {
+                    console.error("ログインエラー:", error);
+                    alert('❌ ログインに失敗しました。IDとパスワードを確認してください。');
+                });
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth).then(() => { alert('🔓 ログアウトしました。'); });
+        });
+
+        const boatData = {
+            "470": ["4237", "4146", "4706", "4572", "陸待or整備"],
+            "スナイプ": ["31594", "31287", "31245", "31067", "28675", "30575", "陸待or整備"],
+            "レスキュー艇": ["ネプチューン", "パルパロ5", "牛若丸"]
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+            if(document.getElementById('sec-' + tabId)) document.getElementById('sec-' + tabId).classList.add('active');
+            if(document.getElementById('nav-' + tabId)) document.getElementById('nav-' + tabId).classList.add('active');
+        }
+
+        document.getElementById('nav-weather').addEventListener('click', () => switchTab('weather'));
+        document.getElementById('nav-bbs').addEventListener('click', () => switchTab('bbs'));
+        document.getElementById('nav-chat').addEventListener('click', () => switchTab('chat'));
+        document.getElementById('nav-maintenance').addEventListener('click', () => switchTab('maintenance'));
+        document.getElementById('nav-record').addEventListener('click', () => switchTab('record'));
+        document.getElementById('nav-tools').addEventListener('click', () => switchTab('tools'));
+
+        function updateBoatOptions(classSelectId, boatSelectId) {
+            const classSelect = document.getElementById(classSelectId);
+            const boatSelect = document.getElementById(boatSelectId);
+            const selectedClass = classSelect.value;
+
+            boatSelect.innerHTML = '';
+
+            if (selectedClass && boatData[selectedClass]) {
+                boatSelect.disabled = false;
+                boatData[selectedClass].forEach(boat => {
+                    const opt = document.createElement('option');
+                    opt.value = boat;
+                    opt.textContent = boat;
+                    boatSelect.appendChild(opt);
+                });
+            } else {
+                boatSelect.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "-- 先にクラスを選択してください --";
+                boatSelect.appendChild(opt);
+            }
+        }
+
+        document.getElementById('maint-class').addEventListener('change', () => updateBoatOptions('maint-class', 'maint-boat'));
+        document.getElementById('record-class').addEventListener('change', () => updateBoatOptions('record-class', 'record-boat'));
+
+        // 📋 掲示板投稿・読み込み
+        document.getElementById('bbs-search').addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase().trim();
+            const posts = document.querySelectorAll('#bbs-list .post');
+            posts.forEach(post => {
+                const title = post.querySelector('.post-title')?.innerText.toLowerCase() || "";
+                const content = post.innerText.toLowerCase();
+                if (title.includes(keyword) || content.includes(keyword)) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
             });
+        });
+
+        document.getElementById('btn-bbs-submit').addEventListener('click', async () => {
+            const title = document.getElementById('bbs-title').value.trim();
+            const priority = document.getElementById('bbs-priority').value;
+            const date = document.getElementById('bbs-date').value;
+            const text = document.getElementById('bbs-input').value.trim();
+
+            if (!title || !text) {
+                alert('題名と本文を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "bbs"), {
+                    title, priority, date, text,
+                    userName: currentUserName,
+                    createdAt: new Date()
+                });
+                document.getElementById('bbs-title').value = '';
+                document.getElementById('bbs-date').value = '';
+                document.getElementById('bbs-input').value = '';
+                alert('📋 掲示板に投稿しました！');
+            } catch (e) {
+                console.error("掲示板投稿エラー:", e);
+                alert('投稿に失敗しました。');
+            }
+        });
+
+        function loadBbsPosts() {
+            const q = query(collection(db, "bbs"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('bbs-list');
+                const alertList = document.getElementById('alert-list');
+                const alertArea = document.getElementById('weather-bbs-alerts');
+                
+                if (!list) return;
+                list.innerHTML = '';
+                if (alertList) alertList.innerHTML = '';
+
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0]; 
+                
+                const threeDaysLater = new Date();
+                threeDaysLater.setDate(now.getDate() + 3);
+                const threeDaysLaterStr = threeDaysLater.toISOString().split('T')[0];
+
+                let hasAlerts = false;
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    const div = document.createElement('div');
+                    div.className = `post ${data.priority === 'high' ? 'priority-high' : ''}`;
+                    
+                    let badges = `<span class="badge ${data.priority === 'high' ? 'badge-high' : 'badge-normal'}">${data.priority === 'high' ? '🚨 重要' : '💬 通常'}</span>`;
+                    if (data.date) badges += `<span class="badge badge-date">📅 予定日: ${data.date}</span>`;
+                    badges += `<span class="badge badge-user">👤 ${data.userName || '部員'}</span>`;
+
+                    const postTimeText = data.createdAt 
+                        ? `<span style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-left: 10px;">(投稿: ${formatDateTime(data.createdAt)})</span>` 
+                        : '';
+                    
+                    div.innerHTML = `
+                        <div class="post-title">${data.title}${postTimeText}</div>
+                        <div>${badges}</div>
+                        <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
+                    `;
+                    list.appendChild(div);
+
+                    if (data.date && alertList) {
+                        if (data.date >= todayStr && data.date <= threeDaysLaterStr) {
+                            hasAlerts = true;
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = `post ${data.priority === 'high' ? 'priority-high' : ''}`;
+                            alertDiv.innerHTML = `
+                                <div class="post-title" style="font-size: 0.95rem;">${data.title} <span style="color:#ffa502;">(期日: ${data.date})</span></div>
+                                <p style="white-space:pre-wrap; margin-top:5px; font-size:0.85rem; color:rgba(255,255,255,0.8);">${data.text}</p>
+                            `;
+                            alertList.appendChild(alertDiv);
+                        }
+                    }
+                });
+
+                if (alertArea) {
+                    alertArea.style.display = hasAlerts ? 'block' : 'none';
+                }
+            });
+        }
+
+        // 🛠️ ヨット管理
+        document.getElementById('btn-maint-submit').addEventListener('click', async () => {
+            const date = document.getElementById('maint-date').value;
+            const className = document.getElementById('maint-class').value;
+            const boat = document.getElementById('maint-boat').value;
+            const text = document.getElementById('maint-text').value.trim();
+
+            if (!date || !className || !boat || !text) {
+                alert('すべての項目を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "maintenance"), {
+                    date, className, boat, text,
+                    userName: currentUserName,
+                    createdAt: new Date()
+                });
+                
+                fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        'type': 'maintenance',
+                        'date': date,
+                        'class': className,
+                        'boat': boat,
+                        'text': text,
+                        'user': currentUserName
+                    })
+                }).catch(e => console.error("GAS送信エラー:", e));
+
+                document.getElementById('maint-text').value = '';
+                alert('🛠️ 管理記録を保存しました！');
+            } catch (e) {
+                console.error("整備記録保存エラー:", e);
+                alert('保存に失敗しました。');
+            }
+        });
+
+        let allMaintRecords = [];
+        function loadMaintenanceRecords() {
+            const q = query(collection(db, "maintenance"), orderBy("date", "desc"));
+            onSnapshot(q, (snapshot) => {
+                allMaintRecords = [];
+                snapshot.forEach(doc => {
+                    allMaintRecords.push(doc.data());
+                });
+                applyMaintenanceFilter();
+            });
+        }
+
+        function applyMaintenanceFilter() {
+            const filterValue = document.getElementById('filter-boat').value;
+            const list = document.getElementById('maint-list');
+            if(!list) return;
+            list.innerHTML = '';
+
+            const filtered = allMaintRecords.filter(rec => filterValue === 'all' || rec.boat === filterValue);
+
+            if(filtered.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.5); text-align:center;">記録がありません。</p>';
+                return;
+            }
+
+            filtered.forEach(data => {
+                const div = document.createElement('div');
+                div.className = 'post';
+                let timeText = data.createdAt ? `<span style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin-left:8px;">(${formatDateTime(data.createdAt)})</span>` : '';
+                div.innerHTML = `
+                    <div class="post-title">［${data.date}］${data.className} - ${data.boat}${timeText}</div>
+                    <div><span class="badge badge-user">👤 記録者: ${data.userName || '不明'}</span></div>
+                    <p style="white-space:pre-wrap; margin-top:10px; font-size:0.95rem;">${data.text}</p>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('filter-boat').addEventListener('change', applyMaintenanceFilter);
+
+        // 📝 練習記録
+        document.getElementById('btn-record-submit').addEventListener('click', async () => {
+            const date = document.getElementById('record-date').value;
+            const className = document.getElementById('record-class').value;
+            const boat = document.getElementById('record-boat').value;
+            const text = document.getElementById('record-text').value.trim();
+
+            if (!date || !className || !boat || !text) {
+                alert('すべての項目を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "records"), {
+                    date, className, boat, text,
+                    userName: currentUserName,
+                    createdAt: new Date()
+                });
+
+                fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        'type': 'record',
+                        'date': date,
+                        'class': className,
+                        'boat': boat,
+                        'text': text,
+                        'user': currentUserName
+                    })
+                }).catch(e => console.error("GAS送信エラー:", e));
+
+                document.getElementById('record-text').value = '';
+                alert('📝 練習記録を保存しました！');
+            } catch (e) {
+                console.error("練習記録保存エラー:", e);
+                alert('保存に失敗しました。');
+            }
         });
 
         function loadRecords() {
@@ -1003,6 +1147,4 @@
                 });
             });
         }
-    </script>
-</body>
-</html>
+    </script></body></html>
