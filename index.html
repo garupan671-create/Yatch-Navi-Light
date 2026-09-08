@@ -561,13 +561,26 @@
 
             <button class="submit-btn" id="btn-finance-submit" style="margin-top:20px;">支出を記録する</button>
 
-            <div id="finance-list" style="margin-top: 20px;"></div>
-        </div> 
-        <script type="module">
+            <div id="finance-list" style="margin-top: 20px;">
+                
+            </div>
+                                                                 
+<script type="module">
+            // 1️⃣ 一番上に import 文をまとめて書きます
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+            import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+            import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+            // 2️⃣ Firebaseの初期化設定（既存のコード）
+            // const app = initializeApp(...);
+            // const db = getFirestore(app);
+
+            // 3️⃣ その下に処理（イベントリスナー）を書きます
             document.getElementById('btn-finance-submit')?.addEventListener('click', async () => {
-                // ここに処理を書きます
+                // 支出保存の処理
             });
         </script>
+        
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { 
