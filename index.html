@@ -564,6 +564,10 @@
             <div id="finance-list" style="margin-top: 20px;"></div>
         </div> 
         <script type="module">
+            document.getElementById('btn-finance-submit')?.addEventListener('click', async () => {
+                // ここに処理を書きます
+            });
+        </script>
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { 
