@@ -821,7 +821,6 @@
                         loadMaintenanceRecords();
                         loadBbsPosts();
                         loadChatMessages();
-                        loadFinances();
                     } else {
                         appContainer.style.display = 'none';
                         nameSetupScreen.style.display = 'flex';
@@ -886,40 +885,6 @@
 
         document.getElementById('btn-logout').addEventListener('click', () => {
             signOut(auth).then(() => { alert('🔓 ログアウトしました。'); });
-        });
-
-document.getElementById('btn-finance-submit')?.addEventListener('click', async () => {
-            const date = document.getElementById('finance-date').value;
-            const amount = document.getElementById('finance-amount').value;
-            const title = document.getElementById('finance-title').value.trim();
-            const payer = document.getElementById('finance-payer').value.trim();
-
-            if (!date || !amount || !title) {
-                alert('📅 日付、💴 金額、📌 用途を入力してください。');
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "finances"), {
-                    date,
-                    amount: Number(amount),
-                    title,
-                    payer: payer || currentUserName,
-                    userName: currentUserName,
-                    uid: currentUserUid,
-                    createdAt: new Date()
-                });
-
-                document.getElementById('finance-date').value = '';
-                document.getElementById('finance-amount').value = '';
-                document.getElementById('finance-title').value = '';
-                document.getElementById('finance-payer').value = '';
-
-                alert('💰 支出を記録しました！');
-            } catch (e) {
-                console.error("支出記録エラー:", e);
-                alert('記録の保存に失敗しました。');
-            }
         });
 
         const boatData = {
@@ -1209,26 +1174,5 @@ document.getElementById('btn-finance-submit')?.addEventListener('click', async (
                     list.appendChild(div);
                 });
             });
-
-
-        function loadFinances() {
-            const q = query(collection(db, "finances"), orderBy("date", "desc"));
-            onSnapshot(q, (snapshot) => {
-                const list = document.getElementById('finance-list');
-                if (!list) return;
-                list.innerHTML = '';
-
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const div = document.createElement('div');
-                    div.className = 'post';
-                    div.innerHTML = `
-                        <div class="post-title">［${data.date}］${data.title} - ¥${Number(data.amount).toLocaleString()}</div>
-                        <div><span class="badge badge-user">👤 支払者: ${data.payer || '不明'}</span></div>
-                    `;
-                    list.appendChild(div);
-                });
-            });
         }
-        
     </script></body></html>
