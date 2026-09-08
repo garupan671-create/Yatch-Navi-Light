@@ -482,7 +482,7 @@
             <div id="maint-list" style="margin-top: 20px;"></div>
         </div>
 
-        <div id="sec-tools" class="content-section">
+<div id="sec-tools" class="content-section">
             <h3>📦 備品・工具管理</h3>
 
             <button id="btn-toggle-add-tool" class="submit-btn" style="background-color: var(--accent-color); color: white; margin-bottom: 15px;">
@@ -519,7 +519,7 @@
 
                 <button class="submit-btn" id="btn-save-tool" style="margin-top:15px;">登録する</button>
             </div>
-           
+
             <div class="filter-area">
                 <label>🗂️ グループ表示の切り替え</label>
                 <select id="tools-group-by">
@@ -529,13 +529,10 @@
 
                 <label style="display:block; margin-top:10px;">🔍 備品名やメモで検索</label>
                 <input type="text" id="tools-search" placeholder="キーワードを入力..." style="margin-top:5px;">
-            <div id="tools-list" style="margin-top: 10px;">
-                
-                </div>            
- </div>               
+            </div>
 
-
-        <div id="sec-finance" class="content-section active">
+            <div id="tools-list" style="margin-top: 10px;"></div>
+        </div> <div id="sec-finance" class="content-section">
             <h3>💰 部活会計・領収書管理</h3>
 
             <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
@@ -547,7 +544,7 @@
                     🔍 画像から自動入力する
                 </button>
                 <div id="scan-status" style="font-size: 0.85rem; color: #ffa502; margin-top: 5px;"></div>
-            
+            </div>
 
             <h4>📝 支出の記録</h4>
             <label for="finance-date">📅 日付</label>
@@ -564,10 +561,8 @@
 
             <button class="submit-btn" id="btn-finance-submit" style="margin-top:20px;">支出を記録する</button>
 
-            <div id="finance-list" style="margin-top: 20px;">
-        
-         
-         </div>            
+            <div id="finance-list" style="margin-top: 20px;"></div>
+        </div> 
         <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
