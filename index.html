@@ -77,19 +77,16 @@
             border-radius: 10px;
             box-sizing: border-box;
         }
-        .content-section.active {
-            display: block;
-        }
-        input, textarea, select, button.submit-btn {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background-color: rgba(0, 0, 0, 0.2);
-            color: var(--text-color);
-            box-sizing: border-box;
-        }
+        .content-section {
+    display: none;
+    width: 90%;
+    max-width: 500px;
+    margin: 20px auto 0 auto; /* 👈 上20px、左右auto（中央揃え）、下0 に設定 */
+    background-color: var(--card-bg);
+    padding: 15px;
+    border-radius: 10px;
+    box-sizing: border-box; /* 👈 余白を含めた幅計算にする */
+}
         select option {
             background-color: var(--card-bg);
             color: var(--text-color);
